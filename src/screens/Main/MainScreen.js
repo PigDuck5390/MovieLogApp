@@ -44,9 +44,12 @@ export default function MainScreen() {
   // 바로 예매하기
   const handleReserve = (movieId) => {
     navigation.navigate("Reservation", {
-      movieId,
-      name: userInfo?.name ?? null,
-      id: userInfo?.id ?? null,
+       userInfo:{
+          movieId: movieId,
+          name: userInfo?.name,
+          id: userInfo?.id,
+       }
+
     });
   };
 
