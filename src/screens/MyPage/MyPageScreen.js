@@ -154,13 +154,6 @@ export default function MyPageScreen() {
                 }
                 )
               }
-                userInfo:{
-                    id: userInfo?.id,
-                    name: userInfo?.name
-                },
-                }
-              )
-            }
           >
             <Text style={styles.menuItem}>예매내역</Text>
           </TouchableOpacity>

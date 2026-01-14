@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
 } from "react-native";
-import Header from "../../components/Header";
 import styles from "./styles";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";

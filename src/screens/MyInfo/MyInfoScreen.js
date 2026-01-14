@@ -264,7 +264,7 @@ export default function MyInfoScreen() {
                 <Text style={styles.cardName}>{c.card_name}</Text>
                 <Text>{c.card_bank}</Text>
                 <Text>{c.card_num}</Text>
-                <TouchableOpacity onPress={() => deleteCard(c.card_id)}>
+                <TouchableOpacity onPress={()=>deleteCard(c.card_id)}>
                   <Text style={styles.delete}>삭제</Text>
                 </TouchableOpacity>
               </View>
