@@ -44,25 +44,24 @@ export default function SeatScreen() {
 
   // 이미 예약된 좌석 필터링
   useEffect(() => {
-    if (!seatData.length) return;
-
     const seatNums = seatData
       .filter(
         (item) =>
-          item.movie_name === title &&
-          String(item.screen_num) === String(screen) &&
-          item.date.split("T")[0] === String(date).split("T")[0] &&
-          item.time === time
+          item.movie_name == title &&
+          item.screen_num == screen &&
+          item.date.split("T")[0] == date.split("T")[0] &&
+          item.time == time
       )
       .flatMap((item) =>
         item.seat_num.includes(",")
           ? item.seat_num.split(",")
           : [item.seat_num]
       );
-
+      console.log(seatNums)
     setReservedSeats(seatNums);
-  }, [seatData, title, time, date, screen]);
+  }, []);
 
+//console.log(reservedSeats)
   const toggleSeat = (seat) => {
     if (reservedSeats.includes(seat)) {
       Alert.alert("알림", "이미 예매된 좌석입니다.");

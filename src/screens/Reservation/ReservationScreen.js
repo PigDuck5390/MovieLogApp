@@ -54,7 +54,7 @@ export default function ReservationScreen() {
     closeDatePicker();
   };
 
-  const moveSeat = (item, time) => {
+  const moveSeat = (item, start_time) => {
     const selectedDate = dateMap[item.movie_id];
 
     if (!userInfo.id) return Alert.alert("알림", "로그인 해주세요.");
@@ -62,7 +62,7 @@ export default function ReservationScreen() {
 
     navigation.navigate("Seat", {
       title: item.title,
-      time,
+      time: start_time,
       date: selectedDate,
       screen: item.screen_number,
       movieId: item.movie_id,
@@ -115,7 +115,9 @@ export default function ReservationScreen() {
 
                 {/* 시간 버튼 */}
                 <View style={styles.timeRow}>
-                  {[item.start_time1, item.start_time2, item.start_time3]
+                  {[item.start_time1, item.start_time2, item.start_time3,
+                    item.start_time4, item.start_time5, item.start_time6,
+                    item.start_time7, item.start_time8, item.start_time9]
                     .filter(Boolean)
                     .map((time) => (
                       <TouchableOpacity
