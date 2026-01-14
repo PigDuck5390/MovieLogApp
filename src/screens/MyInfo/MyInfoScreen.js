@@ -91,7 +91,9 @@ export default function MyInfoScreen() {
     });
 
     Alert.alert("완료", "비밀번호가 변경되었습니다.");
-    navigation.goBack();
+    navigation.navigate("Main", {
+          userInfo: { name: null, id: null },
+        });
   };
 
   /** 카드 등록 */

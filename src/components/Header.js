@@ -25,11 +25,11 @@ export default function Header() {
   useEffect(() => {
     if (!userInfo?.id) return;
 
-    fetch(`http://192.168.0.227:3000/point/${userInfo.id}`)
+    fetch(`http://192.168.0.227:3000/point/${userInfo?.id}`)
       .then((res) => res.json())
       .then((data) => setPoint(data))
       .catch((err) => console.log("포인트 가져오기 실패:", err));
-  }, [userInfo?.id]);
+  }, []);
 
   // ===== 네비게이션 기능 =====
   const movePage = (screen, params = {}) => {
