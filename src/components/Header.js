@@ -39,6 +39,7 @@ export default function Header() {
         name: userInfo?.name,
         id: userInfo?.id,
         point: point,
+        profile: userInfo?.profile,
       },
     });
   };

@@ -55,13 +55,13 @@ export default function MyInfoScreen() {
   }, [cardList]);
 
   /** 이름 변경 */
-  const changeName = async () => {
+  const changeName = () => {
     if (!newName || newName !== confirmName) {
       Alert.alert("오류", "이름이 일치하지 않습니다.");
       return;
     }
 
-    await fetch("http://192.168.0.227:3000/changeName", {
+    fetch("http://192.168.0.227:3000/changeName", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -75,18 +75,18 @@ export default function MyInfoScreen() {
   };
 
   /** 비밀번호 변경 */
-  const changePassword = async () => {
+  const changePassword = () => {
     if (!newPw || newPw !== confirmPw) {
       Alert.alert("오류", "비밀번호가 일치하지 않습니다.");
       return;
     }
 
-    await fetch("http://192.168.0.227:3000/changePassword", {
+    fetch("http://192.168.0.227:3000/changePassword", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: userInfo.id,
-        pw: newPw,
+        newPassword: newPw,
       }),
     });
 
@@ -95,7 +95,7 @@ export default function MyInfoScreen() {
   };
 
   /** 카드 등록 */
-  const registerCard = async () => {
+  const registerCard = () => {
     const user = userData.find(item=>item.id==userInfo.id);
   if(!user){
     Alert.alert("오류", "사용자 정보를 찾을 수 없습니다.");
@@ -119,7 +119,7 @@ export default function MyInfoScreen() {
       return;
     }
 
-    await fetch("http://192.168.0.227:3000/newcard", {
+    fetch("http://192.168.0.227:3000/newcard", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -260,11 +260,11 @@ export default function MyInfoScreen() {
             <Text>등록된 카드가 없습니다.</Text>
           ) : (
             cardList.map((c) => (
-              <View key={c.card_id} style={styles.cardItem}>
+              <View key={c.card_defid} style={styles.cardItem}>
                 <Text style={styles.cardName}>{c.card_name}</Text>
                 <Text>{c.card_bank}</Text>
                 <Text>{c.card_num}</Text>
-                <TouchableOpacity onPress={()=>deleteCard(c.card_id)}>
+                <TouchableOpacity onPress={()=>deleteCard(c.card_defid)}>
                   <Text style={styles.delete}>삭제</Text>
                 </TouchableOpacity>
               </View>
