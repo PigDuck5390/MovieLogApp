@@ -41,7 +41,7 @@ export default StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    gap: 8,
+    gap: 12,
     marginBottom: 24,
   },
   seat: {

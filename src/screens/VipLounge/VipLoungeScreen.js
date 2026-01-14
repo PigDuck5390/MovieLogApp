@@ -16,7 +16,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import styles from "./styles";
 
-const defaultProfile = require("../../assets/profile/너구리.jpg");
+const defaultProfile = require("../../assets/profile/profile.jpg");
 
 const WS_URL = "ws://192.168.0.227:3001";
 

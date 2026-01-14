@@ -3,58 +3,68 @@ import { StyleSheet } from "react-native";
 export default StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#f2f2f2",
   },
 
-  profileBox: {
-    flexDirection: "row",
+  scroll: {
+    paddingBottom: 40,
+  },
+
+  profileCard: {
+    backgroundColor: "#fff",
+    margin: 16,
+    padding: 20,
+    borderRadius: 16,
     alignItems: "center",
-    marginBottom: 30,
+    elevation: 3,
   },
 
   profileImg: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginRight: 15,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    marginBottom: 12,
+    backgroundColor: "#ddd",
   },
 
-  userName: {
+  name: {
     fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 4,
+    fontWeight: "bold",
   },
 
-  userEmail: {
-    color: "#777",
+  point: {
+    fontSize: 15,
+    color: "#666",
+    marginTop: 4,
   },
 
-  menuGrid: {
-    marginTop: 10,
+  menuCard: {
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 14,
+    overflow: "hidden",
+    elevation: 2,
   },
 
   menuBtn: {
-    paddingVertical: 18,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    marginBottom: 12,
-  },
-
-  menuLabel: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-
-  bottomBox: {
-    marginTop: 40,
-  },
-
-  bottomItem: {
-    fontSize: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderBottomColor: "#eee",
+  },
+
+  historyCard: {
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    padding: 16,
+    borderRadius: 14,
+    elevation: 2,
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
   },
 });
