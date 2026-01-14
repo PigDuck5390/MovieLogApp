@@ -23,7 +23,7 @@ export default function SeatScreen() {
   const navigation = useNavigation();
   const route = useRoute();
 
-  const { title, time, date, screen, movieId, userInfo } = route.params || {};
+  const { title, time, date, screen, movieId, userInfo } = route.params;
   const userId = userInfo?.id;
   const userName = userInfo?.name;
 
@@ -31,6 +31,7 @@ export default function SeatScreen() {
   const [reservedSeats, setReservedSeats] = useState([]);
   const [personnel, setPersonnel] = useState(0);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [test, setTest] = useState(false);
 
   // 예매 정보 조회
   useEffect(() => {
@@ -43,25 +44,24 @@ export default function SeatScreen() {
   }, []);
 
   // 이미 예약된 좌석 필터링
-  useEffect(() => {
-    const seatNums = seatData
-      .filter(
-        (item) =>
-          item.movie_name == title &&
-          item.screen_num == screen &&
-          item.date.split("T")[0] == date.split("T")[0] &&
-          item.time == time
-      )
-      .flatMap((item) =>
-        item.seat_num.includes(",")
-          ? item.seat_num.split(",")
-          : [item.seat_num]
-      );
-      console.log(seatNums)
-    setReservedSeats(seatNums);
-  }, []);
+    useEffect(() => {
+      const seatNums = seatData
+        .filter(
+          (item) =>
+            item.movie_name === title &&
+            String(item.screen_num) === String(screen) &&
+            item.date.split("T")[0] === String(date).split("T")[0] &&
+            item.time === time
+        )
+        .flatMap((item) =>
+          item.seat_num.includes(",")
+            ? item.seat_num.split(",")
+            : [item.seat_num]
+        );
 
-//console.log(reservedSeats)
+      setReservedSeats(seatNums);
+    }, [seatData, title, time, date, screen]);
+
   const toggleSeat = (seat) => {
     if (reservedSeats.includes(seat)) {
       Alert.alert("알림", "이미 예매된 좌석입니다.");
