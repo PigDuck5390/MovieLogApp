@@ -3,64 +3,80 @@ import { StyleSheet } from "react-native";
 export default StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#f5f6f8",
+  },
+
+  wrapper: {
+    padding: 16,
   },
 
   title: {
-    fontSize: 24,
-    fontWeight: "700",
+    fontSize: 22,
+    fontWeight: "bold",
     marginBottom: 20,
   },
 
-  label: {
-    marginTop: 16,
-    fontSize: 15,
-    fontWeight: "500",
+  card: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 16,
+    elevation: 2,
+  },
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 12,
   },
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 6,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+    marginBottom: 12,
+    backgroundColor: "#fafafa",
   },
 
-  btn: {
-    backgroundColor: "#333",
-    padding: 14,
-    marginTop: 16,
-    borderRadius: 8,
-  },
-
-  btnText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "600",
-  },
-
-  subTitle: {
-    marginTop: 24,
-    fontSize: 20,
-    fontWeight: "600",
-  },
-
-  cardBox: {
-    padding: 14,
-    marginTop: 12,
+  pickerWrapper: {
     borderWidth: 1,
-    borderRadius: 8,
-    borderColor: "#eee",
+    borderColor: "#ddd",
+    borderRadius: 10,
+    marginBottom: 12,
+    overflow: "hidden",
+    backgroundColor: "#fafafa",
   },
 
-  cardText: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-
-  cardNumber: {
+  button: {
+    backgroundColor: "#222",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
     marginTop: 4,
-    color: "#555",
+  },
+
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  cardItem: {
+    borderTopWidth: 1,
+    borderColor: "#eee",
+    paddingVertical: 10,
+  },
+
+  cardName: {
+    fontWeight: "bold",
+    fontSize: 15,
+  },
+
+  delete: {
+    color: "red",
+    marginTop: 6,
   },
 });

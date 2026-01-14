@@ -1,102 +1,277 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
+import Header from "../../components/Header";
 import styles from "./styles";
 
 export default function MyInfoScreen() {
-  const [user, setUser] = useState(null);
+  const route = useRoute();
+  const navigation = useNavigation();
+  const userInfo = route.params?.userInfo;
+
+  const [newName, setNewName] = useState("");
+  const [confirmName, setConfirmName] = useState("");
+
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
-  const [newName, setNewName] = useState("");
-  const [cards, setCards] = useState([]);
 
+  const [cardName, setCardName] = useState("");
+  const [cardNum, setCardNum] = useState("");
+  const [cardDate, setCardDate] = useState("");
+  const [bank, setBank] = useState("");
+  const [userData, setUserData] = useState([]);
+
+  const [cardList, setCardList] = useState([]);
+
+  if (!userInfo?.id) {
+    return (
+      <View style={styles.container}>
+        <Header userInfo={null} />
+        <Text style={{ padding: 20 }}>로그인이 필요합니다.</Text>
+      </View>
+    );
+  }
+
+  useEffect(()=>{
+    fetch("http://192.168.0.227:3000/userinfo")
+      .then(response=>response.json())
+      .then(data=>setUserData(data))
+  },[]);
+
+  /** 카드 목록 조회 */
   useEffect(() => {
-    fetch("http://192.168.0.227:3000/userinfo?id=1")
-      .then(res => res.json())
-      .then(data => {
-        setUser(data[0]);
-        setNewName(data[0].name);
-      });
+    fetch(`http://192.168.0.227:3000/cardinfo/${userInfo.id}`)
+      .then((res) => res.json())
+      .then(setCardList)
+      .catch(() => {});
+  }, [cardList]);
 
-    fetch("http://192.168.0.227:3000/cards?id=1")
-      .then(res => res.json())
-      .then(data => setCards(data));
-  }, []);
+  /** 이름 변경 */
+  const changeName = async () => {
+    if (!newName || newName !== confirmName) {
+      Alert.alert("오류", "이름이 일치하지 않습니다.");
+      return;
+    }
 
-  const changePassword = () => {
-    if (newPw !== confirmPw) return alert("비밀번호가 일치하지 않습니다.");
-
-    fetch("http://192.168.0.227:3000/changePassword", {
+    await fetch("http://192.168.0.227:3000/changeName", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId: user.id,
-        newPassword: newPw,
-      }),
-    });
-
-    alert("비밀번호가 변경되었습니다.");
-  };
-
-  const updateName = () => {
-    fetch("http://192.168.0.227:3000/changeName", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: user.id,
+        userId: userInfo.id,
         newName: newName,
       }),
     });
 
-    alert("이름이 변경되었습니다.");
+    Alert.alert("완료", "이름이 변경되었습니다.");
+    navigation.goBack();
+  };
+
+  /** 비밀번호 변경 */
+  const changePassword = async () => {
+    if (!newPw || newPw !== confirmPw) {
+      Alert.alert("오류", "비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    await fetch("http://192.168.0.227:3000/changePassword", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: userInfo.id,
+        pw: newPw,
+      }),
+    });
+
+    Alert.alert("완료", "비밀번호가 변경되었습니다.");
+    navigation.goBack();
+  };
+
+  /** 카드 등록 */
+  const registerCard = async () => {
+    const user = userData.find(item=>item.id==userInfo.id);
+  if(!user){
+    Alert.alert("오류", "사용자 정보를 찾을 수 없습니다.");
+    return;
+  }
+    const cardRegex = /^\d{4}-\d{4}-\d{4}-\d{4}$/;
+    const dateRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+
+    if (!cardName || !bank) {
+      Alert.alert("오류", "카드 별명과 카드사를 선택하세요.");
+      return;
+    }
+
+    if (!cardRegex.test(cardNum)) {
+      Alert.alert("오류", "카드 번호 형식이 올바르지 않습니다.");
+      return;
+    }
+
+    if (!dateRegex.test(cardDate)) {
+      Alert.alert("오류", "유효기간 형식(MM/YY)을 확인하세요.");
+      return;
+    }
+
+    await fetch("http://192.168.0.227:3000/newcard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+          userId: userInfo.id,
+          card: cardNum,
+          cardDate: cardDate,
+          defid: user.defid,
+          bank: bank,
+          name: cardName
+      }),
+    });
+
+    Alert.alert("완료", "카드가 등록되었습니다.");
+    setCardName("");
+    setCardNum("");
+    setCardDate("");
+    setBank("");
+  };
+
+  /** 카드 삭제 */
+  const deleteCard = (cardId) => {
+    Alert.alert("삭제 확인", "카드를 삭제하시겠습니까?", [
+      { text: "취소" },
+      {
+        text: "삭제",
+        onPress: async () => {
+          await fetch("http://192.168.0.227:3000/carddelete", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ defid: cardId }),
+          });
+        },
+      },
+    ]);
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      <Header userInfo={userInfo} />
 
-      <Text style={styles.title}>내 정보 수정</Text>
+      <ScrollView contentContainerStyle={styles.wrapper}>
+        <Text style={styles.title}>개인정보 변경</Text>
 
-      {/* 이름 변경 */}
-      <Text style={styles.label}>이름 변경</Text>
-      <TextInput
-        style={styles.input}
-        value={newName}
-        onChangeText={setNewName}
-      />
-      <TouchableOpacity style={styles.btn} onPress={updateName}>
-        <Text style={styles.btnText}>이름 변경</Text>
-      </TouchableOpacity>
-
-      {/* 비밀번호 변경 */}
-      <Text style={styles.label}>새 비밀번호</Text>
-      <TextInput
-        style={styles.input}
-        secureTextEntry
-        value={newPw}
-        onChangeText={setNewPw}
-      />
-
-      <Text style={styles.label}>비밀번호 확인</Text>
-      <TextInput
-        style={styles.input}
-        secureTextEntry
-        value={confirmPw}
-        onChangeText={setConfirmPw}
-      />
-
-      <TouchableOpacity style={styles.btn} onPress={changePassword}>
-        <Text style={styles.btnText}>비밀번호 변경</Text>
-      </TouchableOpacity>
-
-      {/* 카드 목록 */}
-      <Text style={styles.subTitle}>등록된 카드</Text>
-
-      {cards.map((c, i) => (
-        <View key={i} style={styles.cardBox}>
-          <Text style={styles.cardText}>{c.card_name}</Text>
-          <Text style={styles.cardNumber}>{c.card_number}</Text>
+        {/* 이름 변경 */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>이름 변경</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="새 이름"
+            value={newName}
+            onChangeText={setNewName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="이름 확인"
+            value={confirmName}
+            onChangeText={setConfirmName}
+          />
+          <TouchableOpacity style={styles.button} onPress={changeName}>
+            <Text style={styles.buttonText}>변경</Text>
+          </TouchableOpacity>
         </View>
-      ))}
 
-    </ScrollView>
+        {/* 비밀번호 변경 */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>비밀번호 변경</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="새 비밀번호"
+            secureTextEntry
+            value={newPw}
+            onChangeText={setNewPw}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="비밀번호 확인"
+            secureTextEntry
+            value={confirmPw}
+            onChangeText={setConfirmPw}
+          />
+          <TouchableOpacity style={styles.button} onPress={changePassword}>
+            <Text style={styles.buttonText}>변경</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 카드 등록 */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>카드 등록</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="카드 별명"
+            value={cardName}
+            onChangeText={setCardName}
+          />
+
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={bank}
+              onValueChange={(v) => setBank(v)}
+            >
+              <Picker.Item label="카드사를 선택하세요" value="" />
+              <Picker.Item label="국민카드" value="KB" />
+              <Picker.Item label="신한카드" value="SHINHAN" />
+              <Picker.Item label="우리카드" value="WOORI" />
+              <Picker.Item label="하나카드" value="HANA" />
+              <Picker.Item label="삼성카드" value="SAMSUNG" />
+              <Picker.Item label="현대카드" value="HYUNDAI" />
+              <Picker.Item label="롯데카드" value="LOTTE" />
+              <Picker.Item label="NH농협카드" value="NH" />
+            </Picker>
+          </View>
+
+          <TextInput
+            style={styles.input}
+            placeholder="0000-0000-0000-0000"
+            value={cardNum}
+            onChangeText={setCardNum}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="MM/YY"
+            value={cardDate}
+            onChangeText={setCardDate}
+          />
+
+          <TouchableOpacity style={styles.button} onPress={registerCard}>
+            <Text style={styles.buttonText}>카드 등록</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 카드 목록 */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>내 카드</Text>
+
+          {cardList.length === 0 ? (
+            <Text>등록된 카드가 없습니다.</Text>
+          ) : (
+            cardList.map((c) => (
+              <View key={c.card_id} style={styles.cardItem}>
+                <Text style={styles.cardName}>{c.card_name}</Text>
+                <Text>{c.card_bank}</Text>
+                <Text>{c.card_num}</Text>
+                <TouchableOpacity onPress={() => deleteCard(c.card_id)}>
+                  <Text style={styles.delete}>삭제</Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 }

@@ -3,45 +3,33 @@ import { StyleSheet } from "react-native";
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: "#f5f6f8",
   },
 
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 20,
+    fontSize: 20,
+    fontWeight: "bold",
+    margin: 16,
   },
 
   card: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#eee",
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 16,
-    backgroundColor: "#fafafa",
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginBottom: 14,
+    padding: 16,
+    borderRadius: 14,
+    elevation: 2,
   },
 
-  poster: {
-    width: 90,
-    height: 130,
-    borderRadius: 8,
-    marginRight: 14,
-  },
-
-  info: {
-    flex: 1,
-  },
-
-  movieTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+  movieName: {
+    fontSize: 17,
+    fontWeight: "bold",
     marginBottom: 6,
   },
 
-  text: {
+  infoText: {
     fontSize: 14,
-    marginBottom: 3,
+    color: "#555",
+    marginBottom: 2,
   },
 });

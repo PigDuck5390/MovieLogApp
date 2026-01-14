@@ -132,9 +132,13 @@ export default function MyPageScreen() {
         <View style={styles.menu}>
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate("MyInfoEdit", {
-                userInfo,
-              })
+              navigation.navigate("MyInfo", {
+                userInfo:{
+                    id: userInfo?.id,
+                    name: userInfo?.name
+                },
+                }
+              )
             }
           >
             <Text style={styles.menuItem}>개인정보 변경</Text>
@@ -143,8 +147,12 @@ export default function MyPageScreen() {
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("MyReserve", {
-                userInfo,
-              })
+                userInfo:{
+                    id: userInfo?.id,
+                    name: userInfo?.name
+                },
+                }
+              )
             }
           >
             <Text style={styles.menuItem}>예매내역</Text>
