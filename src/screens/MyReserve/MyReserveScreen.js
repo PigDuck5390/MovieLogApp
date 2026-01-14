@@ -4,71 +4,42 @@ import {
   Text,
   ScrollView,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import styles from "./styles";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import Header from "../../components/Header";
 
 export default function MyReserveScreen() {
-  const route = useRoute();
+  const [seatData, setSeatData] = useState([]);
+  const route = useRoute()
   const userInfo = route.params?.userInfo;
 
-  const [seatData, setSeatData] = useState([]);
-
-  // 로그인 방어
-  if (!userInfo?.id) {
-    return (
-      <View style={styles.container}>
-        <Header userInfo={null} />
-        <Text style={{ padding: 20 }}>로그인이 필요합니다.</Text>
-      </View>
-    );
-  }
-
-  /** 예매내역 조회 */
   useEffect(() => {
-    fetch(`http://192.168.0.227:3000/seatlist/${userInfo.id}`)
-      .then((res) => res.json())
-      .then(setSeatData)
-      .catch(() => {});
-  }, [userInfo.id]);
+          fetch(`http://192.168.0.227:3000/seatlist/${userInfo.id}`)
+              .then(response => response.json())
+              .then(data => setSeatData(data))
+      }, []);
+
 
   return (
     <View style={styles.container}>
+      {/* ✅ Header에 userInfo 반드시 전달 */}
       <Header userInfo={userInfo} />
 
-      <ScrollView>
-        <Text style={styles.title}>나의 예매내역</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>예매 내역</Text>
 
-        {seatData.length === 0 ? (
-          <Text style={{ padding: 16 }}>
-            예매 내역이 없습니다.
-          </Text>
-        ) : (
-          seatData.map((item) => (
-            <View
-              key={item.seat_id}
-              style={styles.card}
-            >
-              <Text style={styles.movieName}>
-                {item.movie_name}
-              </Text>
-
-              <Text style={styles.infoText}>
-                날짜: {item.date.slice(0, 10)}
-              </Text>
-              <Text style={styles.infoText}>
-                시간: {item.time}
-              </Text>
-              <Text style={styles.infoText}>
-                좌석: {item.seat_num}
-              </Text>
-              <Text style={styles.infoText}>
-                상영관: {item.screen_name}
-              </Text>
-            </View>
-          ))
-        )}
-      </ScrollView>
+      {seatData.map(r => (
+        <View key={r.seat_id} style={styles.card}>
+          <View style={styles.info}>
+            <Text style={styles.movieTitle}>{r.movie_name}</Text>
+            <Text style={styles.text}>날짜: {r.date}</Text>
+            <Text style={styles.text}>시간: {r.time}</Text>
+            <Text style={styles.text}>좌석: {r.seat_num}</Text>
+          </View>
+        </View>
+      ))}
+    </ScrollView>
     </View>
   );
 }

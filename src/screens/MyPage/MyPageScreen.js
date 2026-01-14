@@ -51,7 +51,7 @@ export default function MyPageScreen() {
   useEffect(() => {
     fetch(`http://192.168.0.227:3000/seatlist/${userInfo.id}`)
       .then((res) => res.json())
-      .then(setSeatData)
+      .then(data=>setSeatData(data))
       .catch(() => {});
   }, [userInfo.id]);
 
@@ -147,6 +147,13 @@ export default function MyPageScreen() {
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("MyReserve", {
+                userInfo: {
+                    id: userInfo?.id,
+                    name: userInfo?.name
+                    }
+                }
+                )
+              }
                 userInfo:{
                     id: userInfo?.id,
                     name: userInfo?.name
@@ -164,18 +171,18 @@ export default function MyPageScreen() {
           <Text style={styles.sectionTitle}>나의 예매내역</Text>
 
           {seatData.length === 0 ? (
-            <Text>예매 내역이 없습니다.</Text>
+            <Text style={styles.reserveTitle}>예매 내역이 없습니다.</Text>
           ) : (
             seatData.map((item) => (
               <View
                 key={item.seat_id}
                 style={styles.reserveCard}
               >
-                <Text>{item.movie_name}</Text>
-                <Text>
+                <Text style={styles.reserveTitle}>{item.movie_name}</Text>
+                <Text style={styles.reserveMeta} >
                   {item.date.slice(0, 10)} {item.time}
                 </Text>
-                <Text>
+                <Text style={styles.reserveSeat}>
                   좌석:{" "}
                   {item.seat_num.split(",").join(", ")}
                 </Text>
