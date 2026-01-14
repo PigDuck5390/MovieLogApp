@@ -16,14 +16,12 @@ export default function MyPageScreen() {
   const navigation = useNavigation();
   const route = useRoute();
 
-  // ✅ 반드시 이렇게 받아야 함
   const userInfo = route.params?.userInfo;
 
   const [profileImg, setProfileImg] = useState(null);
   const [seatData, setSeatData] = useState([]);
   const [point, setPoint] = useState(0);
 
-  // ✅ userInfo 없으면 접근 차단
   if (!userInfo?.id) {
     return (
       <View style={styles.container}>
