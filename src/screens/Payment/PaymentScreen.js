@@ -14,15 +14,17 @@ export default function PaymentScreen() {
   const navigation = useNavigation();
   const route = useRoute();
 
-  const { title, time, date, screen, seats, movieId, userInfo } =
-    route.params || {};
+
+  const { reservInfo, userInfo } = route.params || {};
+
   const userId = userInfo?.id;
   const userName = userInfo?.name;
 
   const [cardData, setCardData] = useState([]);
   const [selectedCardId, setSelectedCardId] = useState(null);
 
-  const seatList = seats ? seats.split(",") : [];
+
+  const seatList = reservInfo?.seats ? reservInfo.seats.split(",") : [];
   const seatCount = seatList.length;
 
   // 카드 정보 조회
@@ -59,27 +61,27 @@ export default function PaymentScreen() {
 
     try {
       // 1) 관객 수 업데이트
-      await fetch("http://192.168.0.227:3000/reservcount", {
+      fetch("http://192.168.0.227:3000/reservcount", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          movieId,
+          movieId: reservInfo.movieId,
           addCount: seatCount,
         }),
       });
 
       // 2) 예매 정보 저장
-      await fetch("http://192.168.0.227:3000/reserv", {
+      fetch("http://192.168.0.227:3000/reserv", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          date,
-          movieName: title,
-          movieTime: time,
-          userName,
-          userId,
-          seat: seats,
-          screen,
+          date: reservInfo.date,
+          movieName: reservInfo.title,
+          movieTime: reservInfo.time,
+          userName: userName,
+          userId: userId,
+          seat: reservInfo.seats,
+          screen: reservInfo.screen,
           pickcount: seatCount,
           cardNumber: selectedCardInfo.card_num,
           cardBank: selectedCardInfo.card_bank,
@@ -88,14 +90,11 @@ export default function PaymentScreen() {
       });
 
       // 3) 포인트 적립
-      await fetch(
-        `http://192.168.0.227:3000/point/add/${userId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ addPoint: seatCount * 10 }),
-        }
-      );
+      fetch(`http://192.168.0.227:3000/point/add/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ addPoint: seatCount * 10 }),
+      });
 
       Alert.alert(
         "결제 완료",
@@ -143,10 +142,18 @@ export default function PaymentScreen() {
 
         {/* 예매 정보 박스 */}
         <View style={styles.infoBox}>
-          <Text style={styles.infoText}>영화 제목: {title}</Text>
-          <Text style={styles.infoText}>상영 날짜: {String(date)}</Text>
-          <Text style={styles.infoText}>상영 시간: {time}</Text>
-          <Text style={styles.infoText}>상영관: {screen}관</Text>
+          <Text style={styles.infoText}>
+            영화 제목: {reservInfo?.title}
+          </Text>
+          <Text style={styles.infoText}>
+            상영 날짜: {String(reservInfo?.date)}
+          </Text>
+          <Text style={styles.infoText}>
+            상영 시간: {reservInfo?.time}
+          </Text>
+          <Text style={styles.infoText}>
+            상영관: {reservInfo?.screen}관
+          </Text>
           <Text style={styles.infoText}>
             좌석: {seatList.length ? seatList.join(", ") : "없음"}
           </Text>

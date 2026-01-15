@@ -44,23 +44,23 @@ export default function SeatScreen() {
   }, []);
 
   // 이미 예약된 좌석 필터링
-    useEffect(() => {
-      const seatNums = seatData
-        .filter(
-          (item) =>
-            item.movie_name === title &&
-            String(item.screen_num) === String(screen) &&
-            item.date.split("T")[0] === String(date).split("T")[0] &&
-            item.time === time
-        )
-        .flatMap((item) =>
-          item.seat_num.includes(",")
-            ? item.seat_num.split(",")
-            : [item.seat_num]
-        );
+  useEffect(() => {
+    const seatNums = seatData
+      .filter(
+        (item) =>
+          item.movie_name === title &&
+          String(item.screen_num) === String(screen) &&
+          item.date.split("T")[0] === String(date).split("T")[0] &&
+          item.time === time
+      )
+      .flatMap((item) =>
+        item.seat_num.includes(",")
+          ? item.seat_num.split(",")
+          : [item.seat_num]
+      );
 
-      setReservedSeats(seatNums);
-    }, [seatData, title, time, date, screen]);
+    setReservedSeats(seatNums);
+  }, [seatData, title, time, date, screen]);
 
   const toggleSeat = (seat) => {
     if (reservedSeats.includes(seat)) {
@@ -87,11 +87,11 @@ export default function SeatScreen() {
   };
 
   const changePersonnel = (delta) => {
-    setSelectedSeats([]); // 인원수 변경 시 좌석 초기화
+    setSelectedSeats([]);
     setPersonnel((prev) => {
       const next = prev + delta;
       if (next < 0) return 0;
-      if (next > 6) return 6; // 6x6 기준 최대 6명 정도 제한
+      if (next > 6) return 6;
       return next;
     });
   };
@@ -108,12 +108,15 @@ export default function SeatScreen() {
         text: "확인",
         onPress: () => {
           navigation.navigate("Payment", {
-            title,
-            time,
-            date,
-            screen,
-            movieId,
-            seats: selectedSeats.join(","),
+
+            reservInfo: {
+              movieId,
+              title,
+              date,
+              time,
+              seats: selectedSeats.join(","), // "A1,A2"
+              screen,
+            },
             userInfo: {
               id: userId,
               name: userName,
@@ -155,7 +158,6 @@ export default function SeatScreen() {
       <Header />
 
       <ScrollView contentContainerStyle={styles.inner}>
-        {/* 영화 정보 */}
         <View style={styles.infoBox}>
           <Text style={styles.movieTitle}>{title}</Text>
           <Text style={styles.infoText}>날짜 : {String(date)}</Text>
@@ -163,15 +165,12 @@ export default function SeatScreen() {
           <Text style={styles.infoText}>상영관 : {screen}관</Text>
         </View>
 
-        {/* 스크린 표시 */}
         <View style={styles.screenBar}>
           <Text style={styles.screenText}>SCREEN</Text>
         </View>
 
-        {/* 좌석 그리드 */}
         {renderSeatGrid()}
 
-        {/* 인원 및 선택 좌석 */}
         <View style={styles.bottomBox}>
           <Text style={styles.bottomLabel}>인원수</Text>
           <View style={styles.personRow}>
