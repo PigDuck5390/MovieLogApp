@@ -7,6 +7,7 @@ import {
 import styles from "./styles";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 export default function MyReserveScreen() {
   const [seatData, setSeatData] = useState([]);
@@ -14,9 +15,13 @@ export default function MyReserveScreen() {
   const userInfo = route.params?.userInfo;
 
   useEffect(() => {
-          fetch(`http://192.168.0.227:3000/seatlist/${userInfo.id}`)
+          fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/seats")
               .then(response => response.json())
-              .then(data => setSeatData(data))
+              .then(data => {
+                const arr = firestoreDocumentsToArray(data)
+                const filtered = arr.filter(item=>item.user_id == userInfo.id)
+                setSeatData(filtered)
+                })
       }, []);
 
 

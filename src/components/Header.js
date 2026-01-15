@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styles from "./headerStyles";
+import { firestoreDocumentsToArray } from "../utils/firestoreRest";
 
 export default function Header() {
   const navigation = useNavigation();
@@ -25,9 +26,12 @@ export default function Header() {
   useEffect(() => {
     if (!userInfo?.id) return;
 
-    fetch(`http://192.168.0.227:3000/point/${userInfo?.id}`)
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users")
       .then((res) => res.json())
-      .then((data) => setPoint(data))
+      .then((data) => {
+        const arr = firestoreDocumentsToArray(data)
+        const filtered = arr.find(item=>item.id == userInfo.id)
+        setPoint(filtered.point)})
       .catch((err) => console.log("포인트 가져오기 실패:", err));
   }, []);
 

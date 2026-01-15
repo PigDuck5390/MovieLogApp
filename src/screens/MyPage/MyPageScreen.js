@@ -11,6 +11,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import styles from "./styles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 export default function MyPageScreen() {
   const navigation = useNavigation();
@@ -35,33 +36,45 @@ export default function MyPageScreen() {
 
   /** 프로필 조회 */
   useEffect(() => {
-    fetch(`http://192.168.0.227:3000/userprofile/${userInfo.id}`)
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users")
       .then((res) => res.json())
       .then((data) => {
-        if (data?.[0]?.profile) {
+        const arr = firestoreDocumentsToArray(data);
+        const filtered = arr.filter(item=>item.id == userInfo.id)
+        if (filtered?.[0]?.profile) {
           setProfileImg(
-            `http://192.168.0.227:3000${data[0].profile}`
+            `https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users${filtered[0].profile}`
           );
         }
       })
       .catch(() => {});
   }, [userInfo.id]);
 
+
   /** 예매 내역 */
   useEffect(() => {
-    fetch(`http://192.168.0.227:3000/seatlist/${userInfo.id}`)
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/seats")
       .then((res) => res.json())
-      .then(data=>setSeatData(data))
+      .then(data=>{
+        const arr = firestoreDocumentsToArray(data)
+        const filtered = arr.filter(item=> item.user_id == userInfo.id)
+        setSeatData(filtered)
+        })
       .catch(() => {});
   }, [userInfo.id]);
 
   /** 포인트 */
   useEffect(() => {
-    fetch(`http://192.168.0.227:3000/point/${userInfo.id}`)
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users")
       .then((res) => res.json())
-      .then(setPoint)
+      .then(data=>{
+        const arr = firestoreDocumentsToArray(data)
+        const filtered = arr.find(item=>item.id == userInfo.id)
+        setPoint(filtered.point)
+        })
       .catch(() => {});
   }, [userInfo.id]);
+
 
   /** 등급 */
   const movieRank = () => {
