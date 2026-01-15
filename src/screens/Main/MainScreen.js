@@ -74,7 +74,7 @@ export default function MainScreen() {
               const rank = startIndex + index + 1;
 
               return (
-                <View key={movie.movie_id} style={styles.movieCard}>
+                <View key={movie._docId} style={styles.movieCard}>
                   <View style={styles.posterWrapper}>
                     <Image
                       source={{
@@ -98,7 +98,7 @@ export default function MainScreen() {
 
                   <TouchableOpacity
                     style={styles.quickReserveBtn}
-                    onPress={() => handleReserve(movie.movie_id)}
+                    onPress={() => handleReserve(movie._docId)}
                   >
                     <Text style={styles.quickReserveText}>바로 예매하기</Text>
                   </TouchableOpacity>

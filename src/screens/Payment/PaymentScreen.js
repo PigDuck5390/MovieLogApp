@@ -10,6 +10,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import styles from "./styles";
 import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
+import { firestoreDB } from "../../utils/firebase";
 
 export default function PaymentScreen() {
   const navigation = useNavigation();
@@ -20,10 +21,13 @@ export default function PaymentScreen() {
 
   const userId = userInfo?.id;
   const userName = userInfo?.name;
+  const movie_docId = reservInfo.movieId
 
   const [cardData, setCardData] = useState([]);
   const [selectedCardId, setSelectedCardId] = useState(null);
-
+  const [movieCount, setMoiveCount] = useState(0);
+  const [userPoint, setUserPoint] = useState(0);
+  const [userDocId, setUserDocId] = useState("")
 
   const seatList = reservInfo?.seats ? reservInfo.seats.split(",") : [];
   const seatCount = seatList.length;
@@ -42,9 +46,32 @@ export default function PaymentScreen() {
       .catch((err) => {
         console.log("cardinfo 조회 실패:", err);
       });
-  }, []);
+  }, [userId]);
 
-  const submit = async () => {
+    //영화정보 조회
+  useEffect(()=>{
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/movies")
+        .then(res=>res.json())
+        .then(data=> {
+            const arr = firestoreDocumentsToArray(data);
+            const filtered = arr.find(item=> item._docId == movie_docId)
+            setMoiveCount(filtered.reserv_count)
+        })
+    },[movie_docId])
+
+    //유저 정보 조회
+    useEffect(()=>{
+        fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users")
+        .then(res=> res.json())
+        .then(data=> {
+            const arr = firestoreDocumentsToArray(data)
+            const filtered = arr.find(item=> item.id == userId)
+            setUserPoint(filtered.point)
+            setUserDocId(filtered._docId)
+        })
+    }, [userId])
+
+  async function submit(){
     if (!cardData.length) {
       Alert.alert("알림", "카드를 등록해주세요.");
       return;
@@ -56,7 +83,7 @@ export default function PaymentScreen() {
     }
 
     const selectedCardInfo = cardData.find(
-      (item) => String(item.card_defid) === String(selectedCardId)
+      (item) => String(item._docId) === String(selectedCardId)
     );
 
     if (!selectedCardInfo) {
@@ -66,40 +93,31 @@ export default function PaymentScreen() {
 
     try {
       // 1) 관객 수 업데이트
-      fetch("http://192.168.0.227:3000/reservcount", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          movieId: reservInfo.movieId,
-          addCount: seatCount,
-        }),
-      });
+      const reserv_count = movieCount+seatCount;
+
+      await firestoreDB.updateReservCount(movie_docId, { reserv_count })
+
 
       // 2) 예매 정보 저장
-      fetch("http://192.168.0.227:3000/reserv", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date: reservInfo.date,
-          movieName: reservInfo.title,
-          movieTime: reservInfo.time,
-          userName: userName,
-          userId: userId,
-          seat: reservInfo.seats,
-          screen: reservInfo.screen,
-          pickcount: seatCount,
-          cardNumber: selectedCardInfo.card_num,
-          cardBank: selectedCardInfo.card_bank,
-          cardDate: selectedCardInfo.card_date,
-        }),
-      });
+      const card_bank = selectedCardInfo.card_bank
+      const card_date = selectedCardInfo.card_date
+      const card_num = selectedCardInfo.card_num
+      const date = reservInfo.date
+      const movie_name = reservInfo.title
+      const pickcount = seatCount
+      const screen_num = reservInfo.screen
+      const seat_num = reservInfo.seats
+      const time = reservInfo.time
+
+
+      await firestoreDB.addSeats( {card_bank, card_date, card_num,
+        date, movie_name, pickcount, screen_num, seat_num,
+        time, userName, userId} )
 
       // 3) 포인트 적립
-      fetch(`http://192.168.0.227:3000/point/add/${userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ addPoint: seatCount * 10 }),
-      });
+      const point = userPoint+seatCount*10
+
+      await firestoreDB.updateUserPoint(userDocId, { point })
 
       Alert.alert(
         "결제 완료",
@@ -123,13 +141,13 @@ export default function PaymentScreen() {
 
   const renderCard = (card) => {
     const isSelected =
-      String(card.card_defid) === String(selectedCardId);
+      String(card._docId) === String(selectedCardId);
 
     return (
       <TouchableOpacity
-        key={card.card_defid}
+        key={card._docId}
         style={[styles.cardItem, isSelected && styles.cardItemSelected]}
-        onPress={() => setSelectedCardId(card.card_defid)}
+        onPress={() => setSelectedCardId(card._docId)}
       >
         <Text style={styles.cardBank}>{card.card_bank}</Text>
         <Text style={styles.cardNum}>{card.card_num}</Text>

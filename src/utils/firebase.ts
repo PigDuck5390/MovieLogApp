@@ -39,6 +39,16 @@ export const db = getFirestore(app);
 
 export const firestoreDB = {
     addUser: (data) => addDoc(collection(db, "users"), {...data}),
+
+    updateReservCount: (docId, data)=>
+        updateDoc(doc(db, "movies", docId), data),
+
+    addSeats: (data) => addDoc(collection(db, "seats"), {...data}),
+
+    updateUserPoint: (uid, data) =>
+        updateDoc(doc(db, "users", uid), { data }),
+
+
     addUserData: (uid, data) => addDoc(collection(db, "users"), {uid, ...data}),
     getAllUsers: ()=> getDocs(collection(db, "users")),
     updateUserData: (docId, data) => updateDoc(doc(db,"users", docId), data),
@@ -47,4 +57,6 @@ export const firestoreDB = {
     deleteCard: (docId) => deleteDoc(doc(db, "user_cards", docId)),
     updatePw: (docId, data) => updateDoc(doc(db,"users", docId),data),
     updateName : (docId, data) => updateDoc(doc(db, "users", docId),data)
+    updateUserData: (docId, data) => updateDoc(doc(db,"users", docId), { data } ),
+    deleteUserData: (docId) => deleteDoc(doc(db, "users", docId))
     };
