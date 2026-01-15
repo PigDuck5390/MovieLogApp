@@ -1,0 +1,46 @@
+import { initializeApp } from "firebase/app";
+import {
+    initializeAuth,
+    getReactNativePersistence,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+    } from "firebase/auth";
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    doc,
+    updateDoc,
+    deleteDoc
+    } from 'firebase/firestore'
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDMXUSyIG6LPl9z4POWPEXPAVM4IDtUGYw",
+  authDomain: "movielogapp-aee83.firebaseapp.com",
+  projectId: "movielogapp-aee83",
+  storageBucket: "movielogapp-aee83.firebasestorage.app",
+  messagingSenderId: "73390983726",
+  appId: "1:73390983726:web:e8fe2db1e2c6ccb248edbf",
+  measurementId: "G-90KQ3BBPNC"
+};
+
+const app = initializeApp(firebaseConfig)
+
+export const auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)}
+    );
+
+export const db = getFirestore(app);
+
+export const firestoreDB = {
+    addUser: (data) => addDoc(collection(db, "users"), {...data}),
+    addUserData: (uid, data) => addDoc(collection(db, "users"), {uid, ...data}),
+    getAllUsers: ()=> getDocs(collection(db, "users")),
+    updateUserData: (docId, data) => updateDoc(doc(db,"users", docId), data),
+    deleteUserData: (docId) => deleteDoc(doc(db, "users", docId))
+    };

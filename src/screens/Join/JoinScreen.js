@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import styles from "../../styles/joinStyles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
+import { firestoreDB } from "../../utils/firebase";
 
 export default function JoinScreen() {
   const navigation = useNavigation();
@@ -13,12 +15,12 @@ export default function JoinScreen() {
   const [userData, setUserData] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.0.227:3000/userinfo")
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users")
       .then(res => res.json())
-      .then(data => setUserData(data));
+      .then(data => setUserData(firestoreDocumentsToArray(data)));
   }, []);
 
-  const handleJoin = () => {
+  async function handleJoin(){
     if (!name || !id || !pw || !checkPw) {
       return Alert.alert("오류", "입력하지 않은 정보가 있습니다.");
     }
@@ -30,17 +32,10 @@ export default function JoinScreen() {
     if (pw !== checkPw) {
       return Alert.alert("오류", "비밀번호 확인이 다릅니다.");
     }
+    const point = 490;
+    const profile = null;
 
-    fetch("http://192.168.0.227:3000/join", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userName: name,
-        userId: id,
-        userPw: pw,
-      }),
-    });
-
+    await firestoreDB.addUser({id, name, point, profile, pw })
     Alert.alert("성공", "회원가입이 완료되었습니다.", [
       { text: "확인", onPress: () => navigation.navigate("Login") },
     ]);

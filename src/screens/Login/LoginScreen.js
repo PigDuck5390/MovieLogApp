@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import styles from "../../styles/loginStyles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -11,9 +12,9 @@ export default function LoginScreen() {
   const [userData, setUserData] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.0.227:3000/userinfo")
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users")
       .then(res => res.json())
-      .then(data => setUserData(data));
+      .then(data => setUserData(firestoreDocumentsToArray(data)));
   }, []);
 
   const handleLogin = () => {

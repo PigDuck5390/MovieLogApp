@@ -10,7 +10,7 @@ import {
   Pressable,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 import Header from "../../components/Header"; // RN용 헤더 컴포넌트 (별도로 구현)
 import styles from "./styles";
@@ -27,9 +27,9 @@ export default function MainScreen() {
 
   // 영화 정보 조회
   useEffect(() => {
-    fetch("http://192.168.0.227:3000/movieinfo")
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/movies")
       .then((response) => response.json())
-      .then((data) => setMovieData(data))
+      .then((data) => setMovieData(firestoreDocumentsToArray(data)))
       .catch((err) => {
         console.log("영화 정보 로딩 실패:", err);
       });

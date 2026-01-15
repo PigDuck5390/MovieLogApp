@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import { View, Image, ScrollView } from "react-native";
 import Header from "../../components/Header";
 import styles from "./styles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 export default function EventScreen() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.0.227:3000/eventinfo")
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/events")
       .then((res) => res.json())
-      .then((data) => setEvents(data))
+      .then((data) => setEvents(firestoreDocumentsToArray(data)))
       .catch((err) => console.log("이벤트 조회 실패:", err));
   }, []);
 

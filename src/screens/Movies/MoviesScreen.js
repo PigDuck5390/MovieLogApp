@@ -10,6 +10,8 @@ import {
 
 import Header from "../../components/Header";
 import styles from "./styles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
+
 
 export default function MoviesScreen() {
   const [movies, setMovies] = useState([]);
@@ -19,9 +21,9 @@ export default function MoviesScreen() {
   const itemRefs = useRef({});
 
   useEffect(() => {
-    fetch("http://192.168.0.227:3000/movies")
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/movies")
       .then((res) => res.json())
-      .then((data) => setMovies(data))
+      .then((data) => setMovies(firestoreDocumentsToArray(data)))
       .catch((err) => console.log("영화 불러오기 실패:", err));
   }, []);
 

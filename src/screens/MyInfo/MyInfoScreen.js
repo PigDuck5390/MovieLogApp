@@ -11,6 +11,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import Header from "../../components/Header";
 import styles from "./styles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 export default function MyInfoScreen() {
   const route = useRoute();
@@ -41,17 +42,20 @@ export default function MyInfoScreen() {
   }
 
   useEffect(()=>{
-    fetch("http://192.168.0.227:3000/userinfo")
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users")
       .then(response=>response.json())
-      .then(data=>setUserData(data))
+      .then(data=>setUserData(firestoreDocumentsToArray(data)))
   },[]);
 
   /** 카드 목록 조회 */
   useEffect(() => {
-    fetch(`http://192.168.0.227:3000/cardinfo/${userInfo.id}`)
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/user_cards")
       .then((res) => res.json())
-      .then(setCardList)
-      .catch(() => {});
+      .then(data => {
+        const arr = firestoreDocumentsToArray(data);
+        const filtered = arr.filter(item => item.user_id == userInfo.id);
+        setCardList(filtered)
+      })
   }, [cardList]);
 
   /** 이름 변경 */
