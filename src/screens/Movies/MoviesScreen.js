@@ -26,7 +26,7 @@ export default function MoviesScreen() {
       .then((data) => setMovies(firestoreDocumentsToArray(data)))
       .catch((err) => console.log("영화 불러오기 실패:", err));
   }, []);
-
+console.log(movies)
   const handleSearch = () => {
     if (!search.trim()) return;
 
@@ -72,7 +72,7 @@ export default function MoviesScreen() {
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent}>
         {movies.map((movie) => (
           <View
-            key={movie.movie_id}
+            key={movie._docId}
             style={styles.section}
             ref={(el) => (itemRefs.current[movie.movie_id] = el)}
           >

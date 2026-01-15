@@ -56,7 +56,7 @@ export default function MyInfoScreen() {
         const filtered = arr.filter(item => item.user_id == userInfo.id);
         setCardList(filtered)
       })
-  }, [cardList]);
+  }, []);
 
   /** 이름 변경 */
   const changeName = () => {

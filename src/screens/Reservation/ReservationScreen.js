@@ -53,7 +53,7 @@ export default function ReservationScreen() {
         animated: true,
       });
     }
-  }, [movieData]);
+  }, [targetMovieId, movieData]);
 
 
   const openDatePicker = (movieId) => {
@@ -74,7 +74,7 @@ export default function ReservationScreen() {
   };
 
   const moveSeat = (item, start_time) => {
-    const selectedDate = dateMap[item.movie_id];
+    const selectedDate = dateMap[item._docId];
 
     if (!userInfo.id) return Alert.alert("알림", "로그인 해주세요.");
     if (!selectedDate) return Alert.alert("알림", "날짜를 선택해주세요.");
@@ -84,7 +84,7 @@ export default function ReservationScreen() {
       time: start_time,
       date: selectedDate,
       screen: item.screen_number,
-      movieId: item.movie_id,
+      movieId: item._docId,
       userInfo: {
         id: userInfo.id,
         name: userInfo.name,
@@ -102,13 +102,13 @@ export default function ReservationScreen() {
         <Text style={styles.screenTitle}>영화 예매</Text>
 
         {movieData.map((item) => {
-          const isTarget = targetMovieId === item.movie_id;
+          const isTarget = targetMovieId === item._docId;
 
           return (
             <View
-              key={item.movie_id}
+              key={item._docId}
               onLayout={(e)=>{
-                moviePositions.current[item.movie_id] = e.nativeEvent.layout.y;
+                moviePositions.current[item._docId] = e.nativeEvent.layout.y;
               }}
 
               style={[styles.card, isTarget && styles.cardHighlighted]}
@@ -131,10 +131,10 @@ export default function ReservationScreen() {
                 {/* 날짜 선택 버튼 */}
                 <TouchableOpacity
                   style={styles.dateButton}
-                  onPress={() => openDatePicker(item.movie_id)}
+                  onPress={() => openDatePicker(item._docId)}
                 >
                   <Text style={styles.dateButtonText}>
-                    {dateMap[item.movie_id] || "날짜 선택"}
+                    {dateMap[item._docId] || "날짜 선택"}
                   </Text>
                 </TouchableOpacity>
 
