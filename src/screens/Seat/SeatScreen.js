@@ -9,6 +9,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import styles from "./styles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 const SEATS = [
   "A1", "A2", "A3", "A4", "A5", "A6",
@@ -35,9 +36,9 @@ export default function SeatScreen() {
 
   // 예매 정보 조회
   useEffect(() => {
-    fetch("http://192.168.0.227:3000/seatlist")
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/seats")
       .then((res) => res.json())
-      .then((data) => setSeatData(data))
+      .then((data) => setSeatData(firestoreDocumentsToArray(data)))
       .catch((err) => {
         console.log("seatlist 조회 실패:", err);
       });

@@ -9,6 +9,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import styles from "./styles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 export default function PaymentScreen() {
   const navigation = useNavigation();
@@ -31,13 +32,17 @@ export default function PaymentScreen() {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`http://192.168.0.227:3000/cardinfo/${userId}`)
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/user_cards")
       .then((res) => res.json())
-      .then((data) => setCardData(data))
+      .then(data => {
+              const arr = firestoreDocumentsToArray(data);
+              const filtered = arr.filter(item => item.user_id == userInfo.id);
+              setCardData(filtered)
+            })
       .catch((err) => {
         console.log("cardinfo 조회 실패:", err);
       });
-  }, [userId]);
+  }, [cardData]);
 
   const submit = async () => {
     if (!cardData.length) {

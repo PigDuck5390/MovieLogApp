@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import Header from "../../components/Header";
 import styles from "./styles";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 
 export default function ReservationScreen() {
   const navigation = useNavigation();
@@ -25,17 +26,35 @@ export default function ReservationScreen() {
   const [dateMap, setDateMap] = useState({});
   const [pickerMovieId, setPickerMovieId] = useState(null); // 어떤 영화의 달력을 열었는지
 
+  const scrollViewRef = useRef(null);
+  const moviePositions = useRef({});
+
   useEffect(() => {
-    fetch("http://192.168.0.227:3000/movies")
+    fetch("https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/movies")
       .then((res) => res.json())
       .then((data) => {
-        const sorted = [...data].sort(
+        const arr = firestoreDocumentsToArray(data);
+        const sorted = arr.sort(
           (a, b) => a.screen_number - b.screen_number
         );
         setMovieData(sorted);
       })
       .catch(() => Alert.alert("오류", "영화 정보를 불러올 수 없습니다."));
   }, []);
+
+  useEffect(() => {
+    if (
+      targetMovieId &&
+      moviePositions.current[targetMovieId] !== undefined &&
+      scrollViewRef.current
+    ) {
+      scrollViewRef.current.scrollTo({
+        y: moviePositions.current[targetMovieId],
+        animated: true,
+      });
+    }
+  }, [movieData]);
+
 
   const openDatePicker = (movieId) => {
     setPickerMovieId(movieId);
@@ -77,7 +96,9 @@ export default function ReservationScreen() {
     <View style={styles.container}>
       <Header />
 
-      <ScrollView contentContainerStyle={styles.scrollInner}>
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={styles.scrollInner}>
         <Text style={styles.screenTitle}>영화 예매</Text>
 
         {movieData.map((item) => {
@@ -86,6 +107,10 @@ export default function ReservationScreen() {
           return (
             <View
               key={item.movie_id}
+              onLayout={(e)=>{
+                moviePositions.current[item.movie_id] = e.nativeEvent.layout.y;
+              }}
+
               style={[styles.card, isTarget && styles.cardHighlighted]}
             >
               <View style={styles.cardLeft}>
