@@ -77,6 +77,4 @@ export const firestoreDB = {
     deleteCard: (docId) => deleteDoc(doc(db, "user_cards", docId)),
     updatePw: (docId, data) => updateDoc(doc(db,"users", docId),data),
     updateName : (docId, data) => updateDoc(doc(db, "users", docId),data)
-    updateUserData: (docId, data) => updateDoc(doc(db,"users", docId), { data } ),
-    deleteUserData: (docId) => deleteDoc(doc(db, "users", docId))
     };
