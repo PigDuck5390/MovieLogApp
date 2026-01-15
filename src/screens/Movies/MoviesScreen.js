@@ -77,7 +77,7 @@ export default function MoviesScreen() {
             ref={(el) => (itemRefs.current[movie.movie_id] = el)}
           >
             <Image
-              source={{ uri: `http://192.168.0.227:3000${movie.poster}` }}
+              source={{ uri: movie.poster_path }}
               style={styles.poster}
             />
 

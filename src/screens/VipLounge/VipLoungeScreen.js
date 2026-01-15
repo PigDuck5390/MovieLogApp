@@ -73,7 +73,7 @@ export default function VipLoungeScreen() {
         ]
       );
     }
-  }, [userId, userName, userPoint]);
+  }, []);
 
   /* ---------------- 프로필 조회 (핵심 수정) ---------------- */
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function VipLoungeScreen() {
         }
       })
       .catch(() => setProfileImg(null));
-  }, [userId]);
+  }, []);
 
   /* ---------------- WebSocket ---------------- */
   useEffect(() => {

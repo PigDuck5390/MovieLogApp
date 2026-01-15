@@ -42,5 +42,9 @@ export const firestoreDB = {
     addUserData: (uid, data) => addDoc(collection(db, "users"), {uid, ...data}),
     getAllUsers: ()=> getDocs(collection(db, "users")),
     updateUserData: (docId, data) => updateDoc(doc(db,"users", docId), data),
-    deleteUserData: (docId) => deleteDoc(doc(db, "users", docId))
+    deleteUserData: (docId) => deleteDoc(doc(db, "users", docId)),
+    addCard: (data) => addDoc(collection(db,"user_cards"),{...data}),
+    deleteCard: (docId) => deleteDoc(doc(db, "user_cards", docId)),
+    updatePw: (docId, data) => updateDoc(doc(db,"users", docId),data),
+    updateName : (docId, data) => updateDoc(doc(db, "users", docId),data)
     };

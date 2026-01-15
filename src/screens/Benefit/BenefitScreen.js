@@ -21,8 +21,8 @@ export default function BenefitScreen() {
       <ScrollView contentContainerStyle={styles.scrollArea}>
         {benefits.map((item) => (
           <Image
-            key={item.defid}
-            source={{ uri: `http://192.168.0.227:3000${item.poster_path}` }}
+            key={item._docId}
+            source={{ uri: item.poster_path }}
             style={styles.poster}
             resizeMode="contain"
           />

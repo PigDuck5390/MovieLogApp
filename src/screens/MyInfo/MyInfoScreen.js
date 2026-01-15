@@ -12,6 +12,7 @@ import { Picker } from "@react-native-picker/picker";
 import Header from "../../components/Header";
 import styles from "./styles";
 import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
+import { firestoreDB } from "../../utils/firebase";
 
 export default function MyInfoScreen() {
   const route = useRoute();
@@ -31,6 +32,7 @@ export default function MyInfoScreen() {
   const [userData, setUserData] = useState([]);
 
   const [cardList, setCardList] = useState([]);
+  const [reload, setReload] = useState(false);
 
   if (!userInfo?.id) {
     return (
@@ -56,57 +58,66 @@ export default function MyInfoScreen() {
         const filtered = arr.filter(item => item.user_id == userInfo.id);
         setCardList(filtered)
       })
-  }, [cardList]);
+  }, [reload]);
 
   /** 이름 변경 */
-  const changeName = () => {
+  const changeName = async () => {
     if (!newName || newName !== confirmName) {
       Alert.alert("오류", "이름이 일치하지 않습니다.");
       return;
     }
 
-    fetch("http://192.168.0.227:3000/changeName", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: userInfo.id,
-        newName: newName,
-      }),
-    });
-
+    const userDoc = userData.find(
+        (u) => u.id === userInfo.id
+    );
+    if(!userDoc?._docId){
+        Alert.alert("오류","사용자 정보를 찾을 수 없습니다.");
+        return;
+    }
+    try{
+        await firestoreDB.updateName(
+           userDoc._docId,
+           {name: newName }
+        );
     Alert.alert("완료", "이름이 변경되었습니다.");
-    navigation.goBack();
+    navigation.navigate("Main", {
+              userInfo: { name: null, id: null },
+            });
+    } catch(e) {
+        Alert.alert("오류","이름 변경 실패");
+    }
   };
 
   /** 비밀번호 변경 */
-  const changePassword = () => {
+  const changePassword = async () => {
     if (!newPw || newPw !== confirmPw) {
       Alert.alert("오류", "비밀번호가 일치하지 않습니다.");
       return;
     }
 
-    fetch("http://192.168.0.227:3000/changePassword", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: userInfo.id,
-        newPassword: newPw,
-      }),
-    });
-
+    const userDoc = userData.find(
+        (u) => u.id === userInfo.id
+    );
+    if(!userDoc?._docId){
+        Alert.alert("오류","사용자 정보를 찾을 수 없습니다.");
+        return;
+    }
+    try{
+        await firestoreDB.updatePw(
+           userDoc._docId,
+           {pw: newPw }
+        );
     Alert.alert("완료", "비밀번호가 변경되었습니다.");
     navigation.navigate("Main", {
-          userInfo: { name: null, id: null },
-        });
+              userInfo: { name: null, id: null },
+            });
+    } catch(e) {
+        Alert.alert("오류","비밀번호 변경 실패");
+    }
   };
 
   /** 카드 등록 */
-  const registerCard = () => {
-    const user = userData.find(item=>item.id==userInfo.id);
-  if(!user){
-    Alert.alert("오류", "사용자 정보를 찾을 수 없습니다.");
-    return;
-  }
+  const registerCard = async () => {
     const cardRegex = /^\d{4}-\d{4}-\d{4}-\d{4}$/;
     const dateRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
 
@@ -124,18 +135,13 @@ export default function MyInfoScreen() {
       Alert.alert("오류", "유효기간 형식(MM/YY)을 확인하세요.");
       return;
     }
-
-    fetch("http://192.168.0.227:3000/newcard", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-          userId: userInfo.id,
-          card: cardNum,
-          cardDate: cardDate,
-          defid: user.defid,
-          bank: bank,
-          name: cardName
-      }),
+    try {
+    await firestoreDB.addCard({
+        user_id: userInfo.id,
+        card_name: cardName,
+        card_bank: bank,
+        card_num: cardNum,
+        card_date: cardDate,
     });
 
     Alert.alert("완료", "카드가 등록되었습니다.");
@@ -143,20 +149,26 @@ export default function MyInfoScreen() {
     setCardNum("");
     setCardDate("");
     setBank("");
+    setReload((prev)=>!prev);
+  } catch(e) {
+    Alert.alert("오류","카드 등록 실패");
+    }
   };
 
   /** 카드 삭제 */
-  const deleteCard = (cardId) => {
+  const deleteCard = async (docId) => {
     Alert.alert("삭제 확인", "카드를 삭제하시겠습니까?", [
       { text: "취소" },
       {
         text: "삭제",
         onPress: async () => {
-          await fetch("http://192.168.0.227:3000/carddelete", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ defid: cardId }),
-          });
+          try{
+            await firestoreDB.deleteCard(docId);
+            Alert.alert("완료","카드가 삭제되었습니다.");
+            setReload((prev)=>!prev);
+          } catch(e) {
+            Alert.alert("오류","카드 삭제 실패");
+          }
         },
       },
     ]);
@@ -266,11 +278,11 @@ export default function MyInfoScreen() {
             <Text>등록된 카드가 없습니다.</Text>
           ) : (
             cardList.map((c) => (
-              <View key={c.card_defid} style={styles.cardItem}>
+              <View key={c._docId} style={styles.cardItem}>
                 <Text style={styles.cardName}>{c.card_name}</Text>
                 <Text>{c.card_bank}</Text>
                 <Text>{c.card_num}</Text>
-                <TouchableOpacity onPress={()=>deleteCard(c.card_defid)}>
+                <TouchableOpacity onPress={()=>deleteCard(c._docId)}>
                   <Text style={styles.delete}>삭제</Text>
                 </TouchableOpacity>
               </View>

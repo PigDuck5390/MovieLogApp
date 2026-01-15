@@ -48,7 +48,7 @@ export default function MyPageScreen() {
         }
       })
       .catch(() => {});
-  }, [userInfo.id]);
+  }, []);
 
 
   /** 예매 내역 */
@@ -61,7 +61,7 @@ export default function MyPageScreen() {
         setSeatData(filtered)
         })
       .catch(() => {});
-  }, [userInfo.id]);
+  }, []);
 
   /** 포인트 */
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function MyPageScreen() {
         setPoint(filtered.point)
         })
       .catch(() => {});
-  }, [userInfo.id]);
+  }, []);
 
 
   /** 등급 */

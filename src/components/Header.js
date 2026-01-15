@@ -20,7 +20,7 @@ export default function Header() {
   // 로그인 정보 반영
   useEffect(() => {
     if (userInfo?.name) setLoggedInName(userInfo.name);
-  }, [userInfo]);
+  }, []);
 
   // 포인트 불러오기
   useEffect(() => {

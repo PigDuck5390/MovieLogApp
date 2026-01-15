@@ -53,7 +53,7 @@ export default function ReservationScreen() {
         animated: true,
       });
     }
-  }, [movieData]);
+  }, [targetMovieId, movieData]);
 
 
   const openDatePicker = (movieId) => {
@@ -116,7 +116,7 @@ export default function ReservationScreen() {
               <View style={styles.cardLeft}>
                 <Image
                   source={{
-                    uri: `http://192.168.0.227:3000${item.poster}`,
+                    uri: item.poster_path,
                   }}
                   style={styles.poster}
                 />

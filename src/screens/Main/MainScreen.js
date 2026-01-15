@@ -78,7 +78,7 @@ export default function MainScreen() {
                   <View style={styles.posterWrapper}>
                     <Image
                       source={{
-                        uri: `http://192.168.0.227:3000${movie.poster}`,
+                        uri: movie.poster_path,
                       }}
                       style={styles.posterImg}
                     />

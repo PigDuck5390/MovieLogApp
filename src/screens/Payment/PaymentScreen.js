@@ -42,7 +42,7 @@ export default function PaymentScreen() {
       .catch((err) => {
         console.log("cardinfo 조회 실패:", err);
       });
-  }, [cardData]);
+  }, []);
 
   const submit = async () => {
     if (!cardData.length) {
