@@ -19,6 +19,10 @@ import {
     deleteDoc
     } from 'firebase/firestore'
 
+import { getStorage, ref,
+    uploadBytes, getDownloadURL } from "firebase/storage";
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyDMXUSyIG6LPl9z4POWPEXPAVM4IDtUGYw",
   authDomain: "movielogapp-aee83.firebaseapp.com",
@@ -36,6 +40,7 @@ export const auth = initializeAuth(app, {
     );
 
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 export const firestoreDB = {
     addUser: (data) => addDoc(collection(db, "users"), {...data}),
@@ -46,7 +51,22 @@ export const firestoreDB = {
     addSeats: (data) => addDoc(collection(db, "seats"), {...data}),
 
     updateUserPoint: (uid, data) =>
-        updateDoc(doc(db, "users", uid), { data }),
+        updateDoc(doc(db, "users", uid), data),
+
+    uploadImage: async (uri: string, path: string) => {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const fileRef = ref(storage, path);
+      await uploadBytes(fileRef, blob);
+
+      const url = await getDownloadURL(fileRef);
+      return url;
+    },
+    // (선택) 프로필만 업데이트용 헬퍼 추가해도 됨 (최소 변경 원하면 없어도 OK)
+    updateUserProfile: (docId, profilePath: string, profileUrl: string) =>
+    updateDoc(doc(db, "users", docId), { profilePath, profileUrl }),
+
 
 
     addUserData: (uid, data) => addDoc(collection(db, "users"), {uid, ...data}),

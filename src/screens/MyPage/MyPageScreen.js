@@ -12,6 +12,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import styles from "./styles";
 import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
+import { firestoreDB } from "../../utils/firebase";
 
 export default function MyPageScreen() {
   const navigation = useNavigation();
@@ -22,6 +23,8 @@ export default function MyPageScreen() {
   const [profileImg, setProfileImg] = useState(null);
   const [seatData, setSeatData] = useState([]);
   const [point, setPoint] = useState(0);
+  const [userDocId, setUserDocId] = useState(null);
+
 
   if (!userInfo?.id) {
     return (
@@ -40,15 +43,17 @@ export default function MyPageScreen() {
       .then((res) => res.json())
       .then((data) => {
         const arr = firestoreDocumentsToArray(data);
-        const filtered = arr.filter(item=>item.id == userInfo.id)
-        if (filtered?.[0]?.profile) {
-          setProfileImg(
-            `https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users${filtered[0].profile}`
-          );
-        }
+        const filtered = arr.find(item=>item.id == userInfo.id)
+        setUserDocId(filtered._docId)
+
+        if (filtered.profileUrl) {
+          setProfileImg(filtered.profileUrl)
+          }
       })
       .catch(() => {});
   }, []);
+
+console.log(userDocId)
 
 
   /** 예매 내역 */
@@ -87,35 +92,40 @@ export default function MyPageScreen() {
 
   /** 프로필 변경 */
   const changeProfile = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.7,
+      });
+      if (result.canceled) return;
 
-    if (result.canceled) return;
+      if (!userDocId) {
+        Alert.alert("오류", "유저 문서 정보를 불러오는 중입니다. 다시 시도해주세요.");
+        return;
+      }
 
-    const formData = new FormData();
-    formData.append("profile", {
-      uri: result.assets[0].uri,
-      name: "profile.jpg",
-      type: "image/jpeg",
-    });
-    formData.append("userId", userInfo.id);
+      const uri = result.assets[0].uri;
 
-    const res = await fetch(
-      "http://192.168.0.227:3000/updateProfile",
-      { method: "PUT", body: formData }
-    );
+      // ✅ Storage에 저장될 경로(=문서에 저장할 경로)
+      // userId로 고정하면 '프로필 변경' 때마다 같은 파일이 덮어써져서 관리가 쉬움
+      const profilePath = `profile/${userInfo.id}.jpg`;
 
-    const data = await res.json();
-    if (data.success) {
-      setProfileImg(
-        `http://192.168.0.227:3000${data.profile}`
-      );
-    } else {
-      Alert.alert("업로드 실패");
+      // 1) Storage 업로드 -> downloadURL 받기
+      const profileUrl = await firestoreDB.uploadImage(uri, profilePath);
+
+      // 2) Firestore users 문서에 경로 저장 + (바로 보여주기용) url 저장
+      await firestoreDB.updateUserData(userDocId, { profilePath, profileUrl });
+
+      // 3) 화면 즉시 반영
+      setProfileImg(profileUrl);
+
+      Alert.alert("완료", "프로필 사진이 변경되었습니다.");
+    } catch (e) {
+      console.log(e);
+      Alert.alert("업로드 실패", "프로필 업로드 중 오류가 발생했습니다.");
     }
   };
+
 
   return (
     <View style={styles.container}>
