@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { Platform } from 'react-native';
 
 export default StyleSheet.create({
   container: {
@@ -22,6 +23,8 @@ export default StyleSheet.create({
     borderRadius: 14,
     marginBottom: 16,
     elevation: 2,
+    zIndex: 999,
+    position: "relative"
   },
 
   sectionTitle: {
@@ -46,7 +49,8 @@ export default StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 10,
     marginBottom: 12,
-    overflow: "hidden",
+    overflow: Platform.OS === "ios" ? "visible" : "hidden",
+    height: Platform.OS === 'ios' ? 200 : 50 ,
     backgroundColor: "#fafafa",
   },
 
