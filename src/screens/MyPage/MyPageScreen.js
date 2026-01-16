@@ -53,7 +53,6 @@ export default function MyPageScreen() {
       .catch(() => {});
   }, []);
 
-console.log(userDocId)
 
 
   /** 예매 내역 */
