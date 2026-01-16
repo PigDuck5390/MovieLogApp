@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import {
     initializeAuth,
     getReactNativePersistence,
@@ -7,7 +7,7 @@ import {
     onAuthStateChanged,
     signOut
     } from "firebase/auth";
-
+import { getDatabase, ref, push, onValue, off } from "firebase/database";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
     getFirestore,
@@ -19,7 +19,7 @@ import {
     deleteDoc
     } from 'firebase/firestore'
 
-import { getStorage, ref,
+import { getStorage, ref as storageRef,
     uploadBytes, getDownloadURL } from "firebase/storage";
 
 
@@ -33,7 +33,31 @@ const firebaseConfig = {
   measurementId: "G-90KQ3BBPNC"
 };
 
-const app = initializeApp(firebaseConfig)
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+export const realtimeDB = getDatabase(app);
+
+export const chatDB = {
+  sendMessage: (roomId, data) =>
+    push(ref(realtimeDB, `chatRooms/${roomId}`), data),
+
+  subscribe: (roomId, callback) => {
+    const roomRef = ref(realtimeDB, `chatRooms/${roomId}`);
+    onValue(roomRef, (snapshot) => {
+      const val = snapshot.val();
+      if (!val) {
+        callback([]);
+        return;
+      }
+      const arr = Object.entries(val).map(([id, v]) => ({
+        _id: id,
+        ...v,
+      }));
+      callback(arr);
+    });
+    return () => off(roomRef);
+  },
+};
 
 export const auth = initializeAuth(app, {
     persistence: getReactNativePersistence(AsyncStorage)}
@@ -57,7 +81,7 @@ export const firestoreDB = {
       const response = await fetch(uri);
       const blob = await response.blob();
 
-      const fileRef = ref(storage, path);
+      const fileRef = storageRef(storage, path);
       await uploadBytes(fileRef, blob);
 
       const url = await getDownloadURL(fileRef);

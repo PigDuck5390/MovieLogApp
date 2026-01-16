@@ -16,8 +16,10 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import styles from "./styles";
 
+import { chatDB } from "../../utils/firebase";
+import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
+
 const defaultProfile = require("../../assets/profile/profile.jpg");
-const WS_URL = "ws://192.168.0.227:3001";
 
 /** 이미지 URL 판별 */
 const isImageUrl = (text) =>
@@ -32,9 +34,10 @@ export default function VipLoungeScreen() {
   const userInfo = route.params?.userInfo || {};
   const userId = userInfo.id;
   const userName = userInfo.name;
-  const userPoint = Number(userInfo.point ?? 0);
 
-  /** 프로필 이미지 */
+  // ✅ point/profile은 "route로 넘어온 값"이 최신이 아닐 수 있어서
+  // VipLounge 들어오면 Firestore users에서 다시 불러와서 맞춰줌(구조/기능 유지 목적)
+  const [userPoint, setUserPoint] = useState(Number(userInfo.point ?? 0));
   const [profileImg, setProfileImg] = useState(null);
 
   /** 채팅 */
@@ -42,8 +45,9 @@ export default function VipLoungeScreen() {
   const [input, setInput] = useState("");
   const [zoomImg, setZoomImg] = useState(null);
 
-  const wsRef = useRef(null);
   const scrollRef = useRef(null);
+
+  const ROOM_ID = "vip"; // VIP 라운지 고정 룸
 
   /* ---------------- 로그인 / VIP 체크 ---------------- */
   useEffect(() => {
@@ -53,8 +57,44 @@ export default function VipLoungeScreen() {
       ]);
       return;
     }
+  }, [userId, userName]);
 
-    if (userPoint < 500) {
+  /* ---------------- 프로필/포인트 조회 (Firestore users에서) ---------------- */
+  useEffect(() => {
+    if (!userId) return;
+
+    fetch(
+      "https://firestore.googleapis.com/v1/projects/movielogapp-aee83/databases/(default)/documents/users"
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const arr = firestoreDocumentsToArray(data);
+        const me = arr.find((u) => u.id == userId);
+
+        if (!me) {
+          setProfileImg(null);
+          setUserPoint(Number(userInfo.point ?? 0));
+          return;
+        }
+
+        // 🔥 profileUrl 있으면 표시
+        if (me.profileUrl) setProfileImg(me.profileUrl);
+        else setProfileImg(null);
+
+        // 🔥 point 있으면 반영
+        setUserPoint(Number(me.point ?? 0));
+      })
+      .catch(() => {
+        setProfileImg(null);
+        setUserPoint(Number(userInfo.point ?? 0));
+      });
+  }, [userId]);
+
+  /* ---------------- VIP 권한 체크 (point 불러온 뒤) ---------------- */
+  useEffect(() => {
+    if (!userId || !userName) return;
+
+    if (Number(userPoint) < 500) {
       Alert.alert(
         "알림",
         "VIP 라운지는 포인트 500점 이상부터 이용 가능합니다.",
@@ -66,50 +106,24 @@ export default function VipLoungeScreen() {
                 userInfo: {
                   id: userId,
                   name: userName,
-                  point: userPoint,
+                  point: Number(userPoint),
                 },
               }),
           },
         ]
       );
     }
-  }, []);
+  }, [userPoint, userId, userName]);
 
-  /* ---------------- 프로필 조회 (핵심 수정) ---------------- */
+  /* ---------------- Realtime Database 구독 (WebSocket 대체) ---------------- */
   useEffect(() => {
-    if (!userId) return;
+    const unsubscribe = chatDB.subscribe(ROOM_ID, (arr) => {
+      // ✅ 시간순 정렬(Realtime DB는 순서가 뒤섞일 수 있음)
+      const sorted = [...arr].sort((a, b) => (a.time ?? 0) - (b.time ?? 0));
+      setMessages(sorted);
+    });
 
-    fetch(`http://192.168.0.227:3000/userprofile/${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.[0]?.profile) {
-          setProfileImg(`http://192.168.0.227:3000${data[0].profile}`);
-        } else {
-          setProfileImg(null);
-        }
-      })
-      .catch(() => setProfileImg(null));
-  }, []);
-
-  /* ---------------- WebSocket ---------------- */
-  useEffect(() => {
-    const ws = new WebSocket(WS_URL);
-    wsRef.current = ws;
-
-    ws.onmessage = (event) => {
-      try {
-        const json = JSON.parse(event.data);
-        setMessages((prev) => [...prev, json]);
-      } catch {
-        console.log("일반 메시지:", event.data);
-      }
-    };
-
-    ws.onerror = (err) => {
-      console.log("WebSocket error:", err.message);
-    };
-
-    return () => ws.close();
+    return unsubscribe;
   }, []);
 
   /* ---------------- 자동 스크롤 ---------------- */
@@ -118,36 +132,37 @@ export default function VipLoungeScreen() {
   }, [messages]);
 
   /* ---------------- 메시지 전송 ---------------- */
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = input.trim();
-    if (!trimmed || !wsRef.current) return;
+    if (!trimmed) return;
 
     const msg = {
       sender: userName,
       userId,
-      profile: profileImg,
+      profile: profileImg, // ✅ 기존 WS 구조(profile) 유지
       message: trimmed,
-      time: new Date().toLocaleTimeString(),
+      time: Date.now(), // ✅ 숫자로 저장(정렬/표시 편함)
     };
 
-    wsRef.current.send(JSON.stringify(msg));
-    setInput("");
+    try {
+      await chatDB.sendMessage(ROOM_ID, msg);
+      setInput("");
+    } catch (e) {
+      console.log(e);
+      Alert.alert("오류", "메시지 전송 실패");
+    }
   };
 
-  const profileSource = profileImg
-    ? { uri: profileImg }
-    : defaultProfile;
+  const profileSource = profileImg ? { uri: profileImg } : defaultProfile;
 
-  /* ---------------- 메시지 렌더 ---------------- */
+  /* ---------------- 메시지 렌더 (기존 구조 유지) ---------------- */
   const renderMessage = (m, idx) => {
     const isMine = m.userId === userId;
-    const msgProfileSource = m.profile
-      ? { uri: m.profile }
-      : defaultProfile;
+    const msgProfileSource = m.profile ? { uri: m.profile } : defaultProfile;
 
     return (
       <View
-        key={`${m.userId}-${idx}`}
+        key={m._id ?? `${m.userId}-${idx}`}
         style={[
           styles.chatMsgRow,
           isMine ? styles.chatMine : styles.chatOther,
@@ -172,7 +187,9 @@ export default function VipLoungeScreen() {
             </TouchableOpacity>
           )}
 
-          <Text style={styles.chatTime}>{m.time}</Text>
+          <Text style={styles.chatTime}>
+            {m.time ? new Date(m.time).toLocaleTimeString() : ""}
+          </Text>
         </View>
 
         {isMine && (
@@ -184,10 +201,10 @@ export default function VipLoungeScreen() {
     );
   };
 
-  /* ---------------- UI ---------------- */
+  /* ---------------- UI (기존 구조 유지) ---------------- */
   return (
     <View style={styles.root}>
-      <Header />
+      <Header userInfo={{ ...userInfo, point: userPoint }} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -212,7 +229,6 @@ export default function VipLoungeScreen() {
               </View>
             </View>
 
-            {/* 🔥 메인/마이페이지 이동 수정 */}
             <TouchableOpacity
               style={styles.vipBackBtn}
               onPress={() =>
@@ -225,9 +241,7 @@ export default function VipLoungeScreen() {
                 })
               }
             >
-              <Text style={styles.vipBackBtnText}>
-                ← 메인 화면으로 돌아가기
-              </Text>
+              <Text style={styles.vipBackBtnText}>← 메인 화면으로 돌아가기</Text>
             </TouchableOpacity>
           </View>
 
@@ -249,10 +263,7 @@ export default function VipLoungeScreen() {
                 placeholder="메시지를 입력하세요"
                 multiline
               />
-              <TouchableOpacity
-                style={styles.vipSendBtn}
-                onPress={handleSend}
-              >
+              <TouchableOpacity style={styles.vipSendBtn} onPress={handleSend}>
                 <Text style={styles.vipSendBtnText}>전송</Text>
               </TouchableOpacity>
             </View>
@@ -265,9 +276,7 @@ export default function VipLoungeScreen() {
             style={styles.zoomOverlay}
             onPress={() => setZoomImg(null)}
           >
-            {zoomImg && (
-              <Image source={{ uri: zoomImg }} style={styles.zoomImage} />
-            )}
+            {zoomImg && <Image source={{ uri: zoomImg }} style={styles.zoomImage} />}
           </TouchableOpacity>
         </Modal>
       </KeyboardAvoidingView>

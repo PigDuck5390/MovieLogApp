@@ -121,7 +121,7 @@ console.log(userDocId)
 
       Alert.alert("완료", "프로필 사진이 변경되었습니다.");
     } catch (e) {
-      console.log(e);
+
       Alert.alert("업로드 실패", "프로필 업로드 중 오류가 발생했습니다.");
     }
   };
@@ -191,7 +191,7 @@ console.log(userDocId)
           ) : (
             seatData.map((item) => (
               <View
-                key={item.seat_id}
+                key={item._docId}
                 style={styles.reserveCard}
               >
                 <Text style={styles.reserveTitle}>{item.movie_name}</Text>
