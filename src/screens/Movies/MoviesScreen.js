@@ -26,7 +26,6 @@ export default function MoviesScreen() {
       .then((data) => setMovies(firestoreDocumentsToArray(data)))
       .catch((err) => console.log("영화 불러오기 실패:", err));
   }, []);
-console.log(movies)
   const handleSearch = () => {
     if (!search.trim()) return;
 

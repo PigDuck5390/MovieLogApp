@@ -53,7 +53,6 @@ export default function MyPageScreen() {
       .catch(() => {});
   }, []);
 
-console.log(userDocId)
 
 
   /** 예매 내역 */
@@ -62,7 +61,7 @@ console.log(userDocId)
       .then((res) => res.json())
       .then(data=>{
         const arr = firestoreDocumentsToArray(data)
-        const filtered = arr.filter(item=> item.user_id == userInfo.id)
+        const filtered = arr.filter(item=> item.userId == userInfo.id)
         setSeatData(filtered)
         })
       .catch(() => {});
