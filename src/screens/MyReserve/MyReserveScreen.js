@@ -34,7 +34,7 @@ export default function MyReserveScreen() {
       <Text style={styles.title}>예매 내역</Text>
 
       {seatData.map(r => (
-        <View key={r.seat_id} style={styles.card}>
+        <View key={r._docId} style={styles.card}>
           <View style={styles.info}>
             <Text style={styles.movieTitle}>{r.movie_name}</Text>
             <Text style={styles.text}>날짜: {r.date}</Text>
