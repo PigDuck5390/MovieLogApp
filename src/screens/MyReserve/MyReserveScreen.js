@@ -19,7 +19,7 @@ export default function MyReserveScreen() {
               .then(response => response.json())
               .then(data => {
                 const arr = firestoreDocumentsToArray(data)
-                const filtered = arr.filter(item=>item.user_id == userInfo.id)
+                const filtered = arr.filter(item=>item.userId == userInfo.id)
                 setSeatData(filtered)
                 })
       }, []);
@@ -33,7 +33,12 @@ export default function MyReserveScreen() {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>예매 내역</Text>
 
-      {seatData.map(r => (
+      {seatData
+      .sort((a, b) => Number(b.date.replaceAll("-", ""))
+        - Number(a.date.replaceAll("-", "")))
+      .sort((a, b) => Number(b.time.replaceAll(":", ""))
+        - Number(a.time.replaceAll(":", "")))
+      .map(r => (
         <View key={r._docId} style={styles.card}>
           <View style={styles.info}>
             <Text style={styles.movieTitle}>{r.movie_name}</Text>
@@ -42,7 +47,9 @@ export default function MyReserveScreen() {
             <Text style={styles.text}>좌석: {r.seat_num}</Text>
           </View>
         </View>
-      ))}
+      )
+
+      )}
     </ScrollView>
     </View>
   );

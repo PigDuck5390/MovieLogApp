@@ -62,7 +62,7 @@ console.log(userDocId)
       .then((res) => res.json())
       .then(data=>{
         const arr = firestoreDocumentsToArray(data)
-        const filtered = arr.filter(item=> item.user_id == userInfo.id)
+        const filtered = arr.filter(item=> item.userId == userInfo.id)
         setSeatData(filtered)
         })
       .catch(() => {});
@@ -189,7 +189,12 @@ console.log(userDocId)
           {seatData.length === 0 ? (
             <Text style={styles.reserveTitle}>예매 내역이 없습니다.</Text>
           ) : (
-            seatData.map((item) => (
+            seatData
+            .sort((a, b) => Number(b.date.replaceAll("-", ""))
+                    - Number(a.date.replaceAll("-", "")))
+            .sort((a, b) => Number(b.time.replaceAll(":", ""))
+                    - Number(a.time.replaceAll(":", "")))
+            .map((item) => (
               <View
                 key={item._docId}
                 style={styles.reserveCard}
