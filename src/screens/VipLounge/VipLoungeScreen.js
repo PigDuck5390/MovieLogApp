@@ -10,9 +10,9 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import Header from "../../components/Header";
 import styles from "./styles";
@@ -36,8 +36,6 @@ export default function VipLoungeScreen() {
   const userId = userInfo.id;
   const userName = userInfo.name;
 
-  // ✅ point/profile은 "route로 넘어온 값"이 최신이 아닐 수 있어서
-  // VipLounge 들어오면 Firestore users에서 다시 불러와서 맞춰줌(구조/기능 유지 목적)
   const [userPoint, setUserPoint] = useState(Number(userInfo.point ?? 0));
   const [profileImg, setProfileImg] = useState(null);
 
@@ -48,17 +46,16 @@ export default function VipLoungeScreen() {
 
   const scrollRef = useRef(null);
 
-  const ROOM_ID = "vip"; // VIP 라운지 고정 룸
+  const ROOM_ID = "vip";
 
-  /* ---------------- 로그인 / VIP 체크 ---------------- */
+  /* ---------------- 로그인 체크 ---------------- */
   useEffect(() => {
     if (!userId || !userName) {
       Alert.alert("알림", "로그인이 필요합니다.", [
         { text: "확인", onPress: () => navigation.navigate("Login") },
       ]);
-      return;
     }
-  }, [userId, userName]);
+  }, [userId, userName, navigation]);
 
   /* ---------------- 프로필/포인트 조회 (Firestore users에서) ---------------- */
   useEffect(() => {
@@ -78,11 +75,7 @@ export default function VipLoungeScreen() {
           return;
         }
 
-        // 🔥 profileUrl 있으면 표시
-        if (me.profileUrl) setProfileImg(me.profileUrl);
-        else setProfileImg(null);
-
-        // 🔥 point 있으면 반영
+        setProfileImg(me.profileUrl ? me.profileUrl : null);
         setUserPoint(Number(me.point ?? 0));
       })
       .catch(() => {
@@ -104,35 +97,33 @@ export default function VipLoungeScreen() {
             text: "확인",
             onPress: () =>
               navigation.navigate("MyPage", {
-                userInfo: {
-                  id: userId,
-                  name: userName,
-                  point: Number(userPoint),
-                },
+                userInfo: { id: userId, name: userName, point: Number(userPoint) },
               }),
           },
         ]
       );
     }
-  }, [userPoint, userId, userName]);
+  }, [userPoint, userId, userName, navigation]);
 
-  /* ---------------- Realtime Database 구독 (WebSocket 대체) ---------------- */
+  /* ---------------- Realtime Database 구독 ---------------- */
   useEffect(() => {
     const unsubscribe = chatDB.subscribe(ROOM_ID, (arr) => {
-      // ✅ 시간순 정렬(Realtime DB는 순서가 뒤섞일 수 있음)
       const sorted = [...arr].sort((a, b) => (a.time ?? 0) - (b.time ?? 0));
       setMessages(sorted);
     });
-
     return unsubscribe;
   }, []);
 
   /* ---------------- 자동 스크롤 ---------------- */
+  const scrollToBottom = () => {
+    // 레이아웃 반영 후 스크롤이 안정적이라 setTimeout 아주 짧게
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 0);
+  };
+
   useEffect(() => {
-    scrollRef.current?.scrollToEnd({ animated: true });
+    scrollToBottom();
   }, [messages]);
 
-  /* ---------------- 메시지 전송 ---------------- */
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -140,14 +131,16 @@ export default function VipLoungeScreen() {
     const msg = {
       sender: userName,
       userId,
-      profile: profileImg, // ✅ 기존 WS 구조(profile) 유지
+      profile: profileImg,
       message: trimmed,
-      time: Date.now(), // ✅ 숫자로 저장(정렬/표시 편함)
+      time: Date.now(),
     };
 
     try {
       await chatDB.sendMessage(ROOM_ID, msg);
       setInput("");
+      Keyboard.dismiss();
+      scrollToBottom();
     } catch (e) {
       console.log(e);
       Alert.alert("오류", "메시지 전송 실패");
@@ -156,7 +149,6 @@ export default function VipLoungeScreen() {
 
   const profileSource = profileImg ? { uri: profileImg } : defaultProfile;
 
-  /* ---------------- 메시지 렌더 (기존 구조 유지) ---------------- */
   const renderMessage = (m, idx) => {
     const isMine = m.userId === userId;
     const msgProfileSource = m.profile ? { uri: m.profile } : defaultProfile;
@@ -178,9 +170,7 @@ export default function VipLoungeScreen() {
         <View style={[styles.chatBubble, isMine && styles.chatBubbleMine]}>
           <Text style={styles.chatName}>{m.sender}</Text>
 
-          {!isImageUrl(m.message) && (
-            <Text style={styles.chatText}>{m.message}</Text>
-          )}
+          {!isImageUrl(m.message) && <Text style={styles.chatText}>{m.message}</Text>}
 
           {isImageUrl(m.message) && (
             <TouchableOpacity onPress={() => setZoomImg(m.message)}>
@@ -202,19 +192,17 @@ export default function VipLoungeScreen() {
     );
   };
 
-  /* ---------------- UI (기존 구조 유지) ---------------- */
   return (
-  <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === "ios" ? "padding" : undefined}
-    keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
-  >
-
-    <View style={styles.root}>
-      <Header userInfo={{ ...userInfo, point: userPoint }} />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+    >
+      <View style={styles.root}>
+        <Header userInfo={{ ...userInfo, point: userPoint }} />
 
         <View style={styles.vipWrapper}>
-          {/* 좌측 사용자 정보 */}
+          {/* 좌측 */}
           <View style={styles.vipSide}>
             <Text style={styles.vipTitle}>VIP Lounge</Text>
 
@@ -223,12 +211,8 @@ export default function VipLoungeScreen() {
 
               <View style={styles.vipUserText}>
                 <Text style={styles.vipUserName}>{userName} 님</Text>
-                <Text style={styles.vipUserPoint}>
-                  보유 포인트 : {userPoint} P
-                </Text>
-                <Text style={styles.vipUserDesc}>
-                  항상 이용해주셔서 감사합니다.
-                </Text>
+                <Text style={styles.vipUserPoint}>보유 포인트 : {userPoint} P</Text>
+                <Text style={styles.vipUserDesc}>항상 이용해주셔서 감사합니다.</Text>
               </View>
             </View>
 
@@ -236,11 +220,7 @@ export default function VipLoungeScreen() {
               style={styles.vipBackBtn}
               onPress={() =>
                 navigation.navigate("Main", {
-                  userInfo: {
-                    id: userId,
-                    name: userName,
-                    point: userPoint,
-                  },
+                  userInfo: { id: userId, name: userName, point: userPoint },
                 })
               }
             >
@@ -252,9 +232,10 @@ export default function VipLoungeScreen() {
           <View style={styles.vipChatSection}>
             <ScrollView
               ref={scrollRef}
-              style={styles.vipChatBox}
-              contentContainerStyle={{ paddingBottom: 10 }}
+              style={styles.vipChatBox} // ✅ flex:1로 바뀐 스타일 사용
+              contentContainerStyle={styles.vipChatBoxContent}
               keyboardShouldPersistTaps="handled"
+              onContentSizeChange={scrollToBottom}
             >
               {messages.map(renderMessage)}
             </ScrollView>
@@ -266,6 +247,7 @@ export default function VipLoungeScreen() {
                 onChangeText={setInput}
                 placeholder="메시지를 입력하세요"
                 multiline
+                onFocus={scrollToBottom}
               />
               <TouchableOpacity style={styles.vipSendBtn} onPress={handleSend}>
                 <Text style={styles.vipSendBtnText}>전송</Text>
@@ -283,7 +265,7 @@ export default function VipLoungeScreen() {
             {zoomImg && <Image source={{ uri: zoomImg }} style={styles.zoomImage} />}
           </TouchableOpacity>
         </Modal>
-    </View>
+      </View>
     </KeyboardAvoidingView>
   );
 }

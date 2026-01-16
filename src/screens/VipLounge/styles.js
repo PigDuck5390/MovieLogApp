@@ -94,17 +94,22 @@ export default StyleSheet.create({
     paddingHorizontal: isLargeScreen ? 22 : 14,
     paddingVertical: isLargeScreen ? 20 : 10,
     elevation: 8,
-//    minHeight: isLargeScreen ? undefined : height * 0.55,
   },
 
+  // ✅ ScrollView 컨테이너: 남는 높이 먹기(입력칸이 아래로 붙고, 키보드 회피 안정)
   vipChatBox: {
+    flex: 1,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 12,
-    padding: isLargeScreen ? 12 : 8,
     backgroundColor: "#f8f9fb",
-    flexGrow: 1,
     marginBottom: 12,
+  },
+
+  // ✅ 실제 메시지 영역 패딩은 contentContainerStyle로
+  vipChatBoxContent: {
+    padding: isLargeScreen ? 12 : 8,
+    paddingBottom: 10,
   },
 
   /* 입력창 */
@@ -117,7 +122,7 @@ export default StyleSheet.create({
 
   vipInput: {
     flex: 1,
-    minHeight: undefined,
+    minHeight: 45,
     maxHeight: 90,
     borderRadius: 10,
     borderWidth: 1,
