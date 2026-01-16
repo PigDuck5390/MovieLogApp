@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-nat
 import { useNavigation } from "@react-navigation/native";
 import styles from "../../styles/loginStyles";
 import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -34,6 +35,12 @@ export default function LoginScreen() {
   };
 
   return (
+  <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        enableOnAndroid
+        extraScrollHeight={20}      // 인풋이 키보드 위로 살짝 더 올라오게
+        keyboardShouldPersistTaps="handled"
+      >
     <View style={styles.page}>
       <View style={styles.container}>
         <Text style={styles.title}>로그인</Text>
@@ -58,5 +65,6 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
     </View>
+    </KeyboardAwareScrollView>
   );
 }

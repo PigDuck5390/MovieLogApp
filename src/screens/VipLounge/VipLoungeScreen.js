@@ -12,6 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import Header from "../../components/Header";
 import styles from "./styles";
@@ -203,13 +204,15 @@ export default function VipLoungeScreen() {
 
   /* ---------------- UI (기존 구조 유지) ---------------- */
   return (
+  <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
+    keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+  >
+
     <View style={styles.root}>
       <Header userInfo={{ ...userInfo, point: userPoint }} />
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
         <View style={styles.vipWrapper}>
           {/* 좌측 사용자 정보 */}
           <View style={styles.vipSide}>
@@ -251,6 +254,7 @@ export default function VipLoungeScreen() {
               ref={scrollRef}
               style={styles.vipChatBox}
               contentContainerStyle={{ paddingBottom: 10 }}
+              keyboardShouldPersistTaps="handled"
             >
               {messages.map(renderMessage)}
             </ScrollView>
@@ -279,7 +283,7 @@ export default function VipLoungeScreen() {
             {zoomImg && <Image source={{ uri: zoomImg }} style={styles.zoomImage} />}
           </TouchableOpacity>
         </Modal>
-      </KeyboardAvoidingView>
     </View>
+    </KeyboardAvoidingView>
   );
 }

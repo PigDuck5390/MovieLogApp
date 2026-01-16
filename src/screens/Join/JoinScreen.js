@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import styles from "../../styles/joinStyles";
 import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 import { firestoreDB } from "../../utils/firebase";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function JoinScreen() {
   const navigation = useNavigation();
@@ -42,6 +43,12 @@ export default function JoinScreen() {
   };
 
   return (
+  <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        enableOnAndroid
+        extraScrollHeight={20}      // 인풋이 키보드 위로 살짝 더 올라오게
+        keyboardShouldPersistTaps="handled"
+      >
     <View style={styles.page}>
       <View style={styles.container}>
         <Text style={styles.title}>회원가입</Text>
@@ -77,5 +84,6 @@ export default function JoinScreen() {
         </TouchableOpacity>
       </View>
     </View>
+    </KeyboardAwareScrollView>
   );
 }

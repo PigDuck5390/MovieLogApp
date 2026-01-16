@@ -1,6 +1,6 @@
 // src/components/Header.js
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styles from "./headerStyles";
@@ -50,7 +50,7 @@ export default function Header() {
 
   const logout = () => {
     setLoggedInName(null);
-    alert("로그아웃 되었습니다.");
+    Alert.alert("알림", "로그아웃 되었습니다.");
     navigation.navigate("Main", {
       userInfo: { name: null, id: null },
     });
@@ -60,7 +60,7 @@ export default function Header() {
     if (point >= 500) {
       movePage("VipLounge");
     } else {
-      alert("영화 더 보고 오세요!");
+      Alert.alert("경고", "영화 더 보고 오세요!");
     }
   };
 

@@ -94,7 +94,7 @@ export default StyleSheet.create({
     paddingHorizontal: isLargeScreen ? 22 : 14,
     paddingVertical: isLargeScreen ? 20 : 10,
     elevation: 8,
-    minHeight: isLargeScreen ? undefined : height * 0.55,
+//    minHeight: isLargeScreen ? undefined : height * 0.55,
   },
 
   vipChatBox: {
@@ -117,7 +117,7 @@ export default StyleSheet.create({
 
   vipInput: {
     flex: 1,
-    minHeight: 45,
+    minHeight: undefined,
     maxHeight: 90,
     borderRadius: 10,
     borderWidth: 1,

@@ -13,6 +13,7 @@ import Header from "../../components/Header";
 import styles from "./styles";
 import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
 import { firestoreDB } from "../../utils/firebase";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function MyInfoScreen() {
   const route = useRoute();
@@ -175,6 +176,12 @@ export default function MyInfoScreen() {
   };
 
   return (
+  <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        enableOnAndroid
+        extraScrollHeight={20}      // 인풋이 키보드 위로 살짝 더 올라오게
+        keyboardShouldPersistTaps="handled"
+      >
     <View style={styles.container}>
       <Header userInfo={userInfo} />
 
@@ -291,5 +298,6 @@ export default function MyInfoScreen() {
         </View>
       </ScrollView>
     </View>
+    </KeyboardAwareScrollView>
   );
 }
