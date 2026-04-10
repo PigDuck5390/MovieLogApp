@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
+import RNPickerSelect from "react-native-picker-select";
+
 import Header from "../../components/Header";
 import styles from "./styles";
 import { firestoreDocumentsToArray } from "../../utils/firestoreRest";
@@ -176,16 +178,16 @@ export default function MyInfoScreen() {
   };
 
   return (
-  <KeyboardAwareScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        enableOnAndroid
-        extraScrollHeight={20}      // 인풋이 키보드 위로 살짝 더 올라오게
-        keyboardShouldPersistTaps="handled"
-      >
     <View style={styles.container}>
       <Header userInfo={userInfo} />
 
       <ScrollView contentContainerStyle={styles.wrapper}>
+      <KeyboardAwareScrollView
+              contentContainerStyle={{ flexGrow: 1 }}
+              enableOnAndroid
+              extraScrollHeight={20}      // 인풋이 키보드 위로 살짝 더 올라오게
+              keyboardShouldPersistTaps="handled"
+            >
         <Text style={styles.title}>개인정보 변경</Text>
 
         {/* 이름 변경 */}
@@ -194,12 +196,14 @@ export default function MyInfoScreen() {
           <TextInput
             style={styles.input}
             placeholder="새 이름"
+            placeholderTextColor="#8a8a8a"
             value={newName}
             onChangeText={setNewName}
           />
           <TextInput
             style={styles.input}
             placeholder="이름 확인"
+            placeholderTextColor="#8a8a8a"
             value={confirmName}
             onChangeText={setConfirmName}
           />
@@ -214,6 +218,7 @@ export default function MyInfoScreen() {
           <TextInput
             style={styles.input}
             placeholder="새 비밀번호"
+            placeholderTextColor="#8a8a8a"
             secureTextEntry
             value={newPw}
             onChangeText={setNewPw}
@@ -221,6 +226,7 @@ export default function MyInfoScreen() {
           <TextInput
             style={styles.input}
             placeholder="비밀번호 확인"
+            placeholderTextColor="#8a8a8a"
             secureTextEntry
             value={confirmPw}
             onChangeText={setConfirmPw}
@@ -237,6 +243,7 @@ export default function MyInfoScreen() {
           <TextInput
             style={styles.input}
             placeholder="카드 별명"
+            placeholderTextColor="#8a8a8a"
             value={cardName}
             onChangeText={setCardName}
           />
@@ -261,6 +268,7 @@ export default function MyInfoScreen() {
           <TextInput
             style={styles.input}
             placeholder="0000-0000-0000-0000"
+            placeholderTextColor="#8a8a8a"
             value={cardNum}
             onChangeText={setCardNum}
           />
@@ -268,6 +276,7 @@ export default function MyInfoScreen() {
           <TextInput
             style={styles.input}
             placeholder="MM/YY"
+            placeholderTextColor="#8a8a8a"
             value={cardDate}
             onChangeText={setCardDate}
           />
@@ -296,8 +305,9 @@ export default function MyInfoScreen() {
             ))
           )}
         </View>
+        </KeyboardAwareScrollView>
       </ScrollView>
     </View>
-    </KeyboardAwareScrollView>
+
   );
 }
