@@ -1,6 +1,7 @@
 # MOVIELOG
 
 > React Native 기반 영화 예매 모바일 앱
+
 > 기존 웹 프로젝트를 React Native 모바일 앱으로 이식한 프로젝트입니다.
 
 <br>
