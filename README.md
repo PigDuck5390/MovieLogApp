@@ -112,7 +112,7 @@ MovieLogApp/
 | 김찬 (팀장) | 앱 기능 이식 |
 | 유조현 | DB 마이그레이션 및 버그 수정 |
 
-### 김찬 (팀장) — 앱 기능 이식
+### 김찬 — 앱 기능 이식
 
 - 웹 기반 UI를 React Native 컴포넌트로 전환 (HTML/CSS → StyleSheet)
 - React Navigation을 이용한 화면 간 네비게이션 구현
