@@ -168,3 +168,10 @@ npx expo start
 | `seats` | 좌석 예약 정보 |
 | `user_cards` | 저장된 결제 카드 |
 | `chatRooms` | VIP 라운지 실시간 채팅 (Realtime DB) |
+
+---
+
+## WEB 버전
+
+https://github.com/PigDuck5390/MovieLog
+
