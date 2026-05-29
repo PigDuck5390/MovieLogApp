@@ -1,4 +1,4 @@
-# MOVIELOG
+# 📖 MOVIELOG APP
 
 > React Native 기반 영화 예매 모바일 앱
 
