@@ -6,7 +6,20 @@
 
 <br>
 
-## 📱 스크린샷
+## 📋 목차
+
+- [📱 UI 소개](#📱-ui-소개)
+- [✨ 주요 기능](#✨-주요-기능)
+- [🛠 기술 스택](#🛠-기술-스택)
+- [📁 프로젝트 구조](#📁-프로젝트-구조)
+- [🔥 Firebase 데이터 구조](#🔥-firebase-데이터-구조)
+- [🚀 시작하기](#🚀-시작하기)
+- [👥 팀원 역할 분담](#👥-팀원-역할-분담)
+- [🌐 WEB 버전](#🌐-web-버전)
+
+<br>
+
+## 📱 UI 소개
 
 <table>
   <tr>
@@ -43,31 +56,33 @@
 
 <br>
 
-## 주요 기능
+## ✨ 주요 기능
 
 - **영화 목록 / 검색** — 현재 상영 중인 영화를 탐색하고 검색
-- **회원 인증** — 아이디/비밀번호 기반 로그인 및 회원가입
-- **영화 예매** — 날짜·시간 선택 → 좌석 선택 → 카드 결제
-- **포인트 시스템** — 예매 시 포인트 적립, 500P 이상 시 VIP 해금
+- **회원 인증** — 아이디/비밀번호 기반 로그인 및 회원가입 (초기 포인트 490P (Mock))
+- **영화 예매** — 날짜·시간 선택 → 좌석 선택(최대 6인) → 카드 결제 (좌석당 10,000원)
+- **포인트 시스템** — 좌석 1개당 10P 적립, 500P 이상 시 VIP 해금
 - **VIP 라운지** — VIP 전용 실시간 채팅 커뮤니티
-- **마이페이지** — 예매 내역 조회, 프로필 수정, 결제 카드 관리
+- **마이페이지** — 프로필 사진 변경, 예매 내역 요약, 등급 확인
+- **개인정보 관리** — 이름·비밀번호 변경, 결제 카드 등록·삭제
+- **이벤트 / 혜택** — 진행 중인 이벤트와 회원 혜택 정보 제공
 
 <br>
 
-## 기술 스택
+## 🛠 기술 스택
 
 | 분류 | 기술 |
 |------|------|
 | Framework | React Native 0.81 + Expo SDK 54 |
 | Language | JavaScript / TypeScript |
 | Navigation | React Navigation 7 (Native Stack) |
-| Backend | Firebase (Auth · Firestore · Realtime DB · Storage) |
+| Backend | Firebase (Firestore · Realtime DB · Storage) |
 | Build | EAS (Expo Application Services) |
 | Platform | Android · iOS · Web |
 
 <br>
 
-## 프로젝트 구조
+## 📁 프로젝트 구조
 
 ```
 MovieLogApp/
@@ -105,43 +120,28 @@ MovieLogApp/
 
 <br>
 
-## 팀원 역할 분담
+## 🔥 Firebase 데이터 구조
 
-| 이름 | 역할 |
-|------|------|
-| 김찬 (팀장) | 앱 기능 이식 |
-| 유조현 | DB 마이그레이션 및 버그 수정 |
-
-### 김찬 — 앱 기능 이식
-
-- 웹 기반 UI를 React Native 컴포넌트로 전환 (HTML/CSS → StyleSheet)
-- React Navigation을 이용한 화면 간 네비게이션 구현
-- 공통 헤더 컴포넌트 및 메뉴 구성
-- 영화 목록, 예매, 좌석 선택, 결제 화면 구현
-- VIP 라운지 실시간 채팅 UI 구현
-- 마이페이지, 개인정보 수정, 예매 내역 화면 구현
-- Expo 환경 설정 및 빌드 구성 (EAS)
-
-### 유조현 — DB 마이그레이션 및 버그 수정
-
-- 웹 프로젝트의 데이터베이스 구조 분석 및 Firebase 스키마 설계
-- Firestore 컬렉션 마이그레이션 (`users`, `movies`, `seats`, `user_cards`)
-- 웹용 Firebase SDK 쿼리를 모바일 환경에 맞게 재작성
-- Firestore REST API 파서(`firestoreRest.js`) 구현
-- Realtime Database 기반 채팅 기능 연동
-- 이식 과정에서 발생한 인증·데이터 연동 버그 수정
-- 포인트 시스템 및 VIP 접근 권한 로직 오류 수정
+| 컬렉션 | 설명 |
+|--------|------|
+| `users` | 사용자 프로필, 포인트, 등급 |
+| `movies` | 영화 목록, 상영 시간표, 누적 예매 수 |
+| `seats` | 좌석 예약 정보 (날짜·시간·카드 정보 포함) |
+| `user_cards` | 저장된 결제 카드 |
+| `benefits` | 혜택 포스터 이미지 |
+| `events` | 이벤트 포스터 이미지 |
+| `chatRooms` | VIP 라운지 실시간 채팅 (Realtime DB) |
 
 <br>
 
-## 시작하기
+## 🚀 시작하기
 
-### 사전 요구사항
+### ⚙️ 사전 요구사항
 
 - Node.js 18+
 - Expo CLI
 
-### 설치 및 실행
+### 💻 설치 및 실행
 
 ```bash
 # 의존성 설치
@@ -159,19 +159,35 @@ npx expo start
 
 <br>
 
-## Firebase 데이터 구조
+## 👥 팀원 역할 분담
 
-| 컬렉션 | 설명 |
-|--------|------|
-| `users` | 사용자 프로필, 포인트 |
-| `movies` | 영화 목록 및 예매 수 |
-| `seats` | 좌석 예약 정보 |
-| `user_cards` | 저장된 결제 카드 |
-| `chatRooms` | VIP 라운지 실시간 채팅 (Realtime DB) |
+| 이름 | 역할 |
+|------|------|
+| 김찬 (팀장) | 앱 기능 이식 |
+| 유조현 | DB 마이그레이션 및 버그 수정 |
 
----
+### 🔧 김찬 — 앱 기능 이식
 
-## WEB 버전
+- 웹 기반 UI를 React Native 컴포넌트로 전환 (HTML/CSS → StyleSheet)
+- React Navigation을 이용한 화면 간 네비게이션 구현
+- 공통 헤더 컴포넌트 및 메뉴 구성
+- 영화 목록, 예매, 좌석 선택, 결제 화면 구현
+- VIP 라운지 실시간 채팅 UI 구현
+- 마이페이지, 개인정보 수정, 예매 내역 화면 구현
+- Expo 환경 설정 및 빌드 구성 (EAS)
+
+### 🗄️ 유조현 — DB 마이그레이션 및 버그 수정
+
+- 웹 프로젝트의 데이터베이스 구조 분석 및 Firebase 스키마 설계
+- Firestore 컬렉션 마이그레이션 (`users`, `movies`, `seats`, `user_cards`)
+- 웹용 Firebase SDK 쿼리를 모바일 환경에 맞게 재작성
+- Firestore REST API 파서(`firestoreRest.js`) 구현
+- Realtime Database 기반 채팅 기능 연동
+- 이식 과정에서 발생한 인증·데이터 연동 버그 수정
+- 포인트 시스템 및 VIP 접근 권한 로직 오류 수정
+
+<br>
+
+## 🌐 WEB 버전
 
 https://github.com/PigDuck5390/MovieLog
-
